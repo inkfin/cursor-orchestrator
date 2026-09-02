@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/**\nScope: split the parser\nVerification: npm test\nExecution mode: single",
+  "is_parallel_worker": true
+}

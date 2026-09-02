@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/**\nScope: refactor\nVerification: npm test\nExecution mode: parallel/worktree\nUse local worktree isolation for this package.",
+  "is_parallel_worker": true
+}

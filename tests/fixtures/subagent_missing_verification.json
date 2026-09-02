@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/**\nScope: fix bug\nExecution mode: single",
+  "is_parallel_worker": false
+}

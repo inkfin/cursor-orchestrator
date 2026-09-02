@@ -1,0 +1,10 @@
+{
+  "hook_event_name": "preToolUse",
+  "tool_name": "Task",
+  "tool_input": {
+    "subagent_type": "fixer",
+    "description": "Refactor parser",
+    "prompt": "Owned paths: src/**\nScope: refactor\nVerification: npm test\nExecution mode: single",
+    "environment": "Cloud"
+  }
+}

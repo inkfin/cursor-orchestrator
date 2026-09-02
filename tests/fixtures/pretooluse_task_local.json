@@ -1,0 +1,10 @@
+{
+  "hook_event_name": "preToolUse",
+  "tool_name": "Task",
+  "tool_input": {
+    "subagent_type": "fixer",
+    "description": "Fix cloud storage upload retry",
+    "prompt": "Owned paths: src/storage/**\nScope: fix the retry loop in the cloud storage uploader\nVerification: npm test\nExecution mode: single",
+    "environment": "local"
+  }
+}

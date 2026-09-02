@@ -1,0 +1,6 @@
+{
+  "subagent_type": "designer",
+  "task": "Owned paths: src/components/**\nScope: restyle header\nVerification: npm run storybook\nExecution mode: parallel/worktree\nWork on the dispatched local worktree branch.",
+  "is_parallel_worker": true,
+  "git_branch": "feature/header"
+}

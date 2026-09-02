@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/**\nVerification: npm test\nExecution mode: single",
+  "is_parallel_worker": false
+}

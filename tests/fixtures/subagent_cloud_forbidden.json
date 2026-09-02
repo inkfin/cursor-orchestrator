@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/**\nScope: deploy\nVerification: npm test\nExecution mode: cloud",
+  "is_parallel_worker": false
+}

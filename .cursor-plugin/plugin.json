@@ -1,13 +1,19 @@
 {
   "name": "cursor-orchestrator",
-  "description": "Specialist subagents and routing policy for multi-agent coding work.",
-  "version": "0.1.0",
+  "description": "Cursor-native policy pack: specialist lanes, single-writer orchestration, verification, and task-contract hooks.",
+  "version": "0.2.0",
   "author": {
     "name": "finkzhang"
   },
   "keywords": [
     "agents",
     "orchestration",
-    "workflow"
-  ]
+    "workflow",
+    "verification",
+    "hooks"
+  ],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "rules": "./rules/",
+  "hooks": "./hooks/hooks.json"
 }

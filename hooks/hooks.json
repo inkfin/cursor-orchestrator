@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "subagentStart": [
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/hooks/task-contract-guard.py\"",
+        "matcher": "fixer|designer",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/hooks/task-contract-guard.py\"",
+        "matcher": "Task",
+        "failClosed": true
+      }
+    ]
+  }
+}

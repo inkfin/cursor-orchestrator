@@ -1,0 +1,5 @@
+{
+  "subagent_type": "fixer",
+  "task": "Owned paths: src/api/**\nScope: add health endpoint only\nVerification: npm test && npm run lint\nExecution mode: single\nImplement GET /health.",
+  "is_parallel_worker": false
+}
