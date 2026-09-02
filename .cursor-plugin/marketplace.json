@@ -1,0 +1,17 @@
+{
+  "name": "cursor-orchestrator",
+  "owner": {
+    "name": "inkfin",
+    "url": "https://github.com/inkfin"
+  },
+  "metadata": {
+    "description": "Specialist subagents and routing policy for multi-agent coding work."
+  },
+  "plugins": [
+    {
+      "name": "cursor-orchestrator",
+      "source": "./",
+      "description": "Specialist subagents and routing policy for multi-agent coding work."
+    }
+  ]
+}
