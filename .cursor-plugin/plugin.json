@@ -1,0 +1,13 @@
+{
+  "name": "cursor-orchestrator",
+  "description": "Specialist subagents and routing policy for multi-agent coding work.",
+  "version": "0.1.0",
+  "author": {
+    "name": "finkzhang"
+  },
+  "keywords": [
+    "agents",
+    "orchestration",
+    "workflow"
+  ]
+}
