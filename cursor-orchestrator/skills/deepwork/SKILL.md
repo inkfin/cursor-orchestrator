@@ -11,6 +11,10 @@ description: >-
 
 Use for **large** implementation: multi-module refactors, new subsystems, coordinated API + client changes, or any work that might tempt unsafe parallel writes.
 
+## Do not use
+
+Do not use deepwork for small demos, throwaway research spikes, typo/comment edits, or a bounded single-session slice. Route those through the lighter workflow instead; do not add pilot or phase-gate ceremony.
+
 ## Phase gates
 
 Work proceeds in order; do not skip gates.
@@ -33,6 +37,8 @@ Enable only when **all** hold:
 - ≥2 independent work packages with no write-order dependency during implementation
 - Non-overlapping **Owned paths** per writer
 - No shared schema, lock, or generated files across packages
+
+Before broad parallel dispatch, pilot the contract and evidence path on one representative, non-trivial work package. Fix ownership or verification gaps first. Do not require a pilot for demos, typos, or other trivial work.
 
 For each parallel writer:
 

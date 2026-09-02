@@ -14,6 +14,7 @@ GUARD = PLUGIN_DIR / "hooks" / "task-contract-guard.py"
 HOOKS_JSON = PLUGIN_DIR / "hooks" / "hooks.json"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 VALIDATE = REPO_ROOT / "scripts" / "validate_plugin.py"
+SKILLS_DIR = PLUGIN_DIR / "skills"
 
 
 def run_guard(payload: dict) -> tuple[int, dict]:
@@ -180,6 +181,7 @@ class HooksManifestTests(unittest.TestCase):
 class PluginManifestTests(unittest.TestCase):
     def test_plugin_json_declares_component_paths(self) -> None:
         plugin = json.loads((PLUGIN_DIR / ".cursor-plugin" / "plugin.json").read_text())
+        self.assertEqual(plugin.get("version"), "0.3.0")
         self.assertEqual(plugin.get("agents"), "./agents/")
         self.assertEqual(plugin.get("skills"), "./skills/")
         self.assertEqual(plugin.get("rules"), "./rules/")
@@ -199,6 +201,65 @@ class PluginManifestTests(unittest.TestCase):
             self.assertLessEqual(
                 set(entry), {"name", "source", "description", "minClientVersions"}
             )
+
+class PstackLiteSkillTests(unittest.TestCase):
+    def skill_text(self, name: str) -> str:
+        path = SKILLS_DIR / name / "SKILL.md"
+        self.assertTrue(path.is_file())
+        text = path.read_text()
+        self.assertTrue(text.startswith("---\n"))
+        self.assertIn(f"name: {name}", text)
+        self.assertIn("description:", text)
+        return text
+
+    def test_new_skills_have_frontmatter(self) -> None:
+        for name in ("prototype-lite", "collab-debug", "goal-watch"):
+            with self.subTest(skill=name):
+                self.skill_text(name)
+
+    def test_prototype_cannot_modify_product_code(self) -> None:
+        text = self.skill_text("prototype-lite")
+        self.assertIn("product paths remain read-only", text)
+        self.assertIn("hand product-code work to `fixer` or `designer`", text)
+
+    def test_collab_debug_forbids_guessing_before_reproduction(self) -> None:
+        text = self.skill_text("collab-debug")
+        self.assertIn("failure is not reproduced", text)
+        self.assertIn("do not ask `fixer` to guess a repair", text)
+
+    def test_goal_watch_safety_invariants(self) -> None:
+        text = self.skill_text("goal-watch")
+        for phrase in (
+            "persistent server-side `cursor-agent` CLI session",
+            "does **not** guarantee wakeup",
+            "hard stop conditions only",
+            "Never run an agent polling loop",
+            "never use a Ralph `stop` hook",
+            "Idempotent wake",
+            "One goal controls exactly one job",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+    def test_goal_watch_continue_without_retune(self) -> None:
+        text = self.skill_text("goal-watch")
+        self.assertIn("A non-terminal wake does **not** retune", text)
+        self.assertIn("rebuild the watcher and update next wake only. Do not stop, start, or retune", text)
+        self.assertIn("leave the old job running and re-arm only. Do not stop, start, or retune", text)
+        self.assertIn("then — and only then — change one allowed knob", text)
+        self.assertIn("wake reason, metric freshness, evaluation window, and attempt id", text)
+        self.assertIn("continue/re-arm without retune", text)
+
+    def test_recon_before_plan_is_formal_only(self) -> None:
+        text = (PLUGIN_DIR / "rules" / "orchestration.mdc").read_text()
+        self.assertIn(
+            "For **formal non-trivial implementation** only, dispatch `explorer` before planning",
+            text,
+        )
+        self.assertIn(
+            "read-only investigation, scratch prototype, and collab diagnosis skip full recon",
+            text,
+        )
 
 
 class ValidatePluginScriptTests(unittest.TestCase):

@@ -34,4 +34,12 @@ If any field is missing, stop and report the gap — do not improvise scope.
 - Scope stops at the instructions: the plan stays intact, drive-by refactors stay out.
 - If the plan itself is wrong or insufficient — stop and report back. A wrong plan escalated is success; an improvised rewrite is failure.
 
-Report: what changed and why, verification output, any deviation from the instructions.
+## Final report
+
+Keep the handoff short:
+
+- **Status** — `success`, `partial`, or `blocked`
+- **Summary** — what changed and why
+- **Verification** — commands/evidence actually run and their results
+- **Deviations / blockers** — scope deviations, failures, or `none`
+- **Suggested follow-ups** — only useful next actions, or `none`

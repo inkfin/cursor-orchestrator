@@ -12,6 +12,10 @@ Use this skill **before** dispatching a writer on any non-trivial change.
 
 Trivial = single-file typo, comment-only edit, or rename with no behavior change.
 
+## Exemptions
+
+Throwaway prototypes, read-only investigations, and pure environment diagnosis may skip the full plan and independent verifier. Record one sentence explaining which exemption applies. Promotion to product code ends the exemption.
+
 ## Produce a verification plan
 
 Output a short plan with these sections:
@@ -39,7 +43,19 @@ Prefer automated evidence. If only manual proof is possible, name the steps.
 
 The writer runs **Verification** commands from the task contract. `verifier` re-checks requirements, diff, and evidence independently.
 
-### 4. Budget
+### 4. Acceptance strength
+
+Choose and report the strongest status supported by actual evidence:
+
+- `live-ui-verified` — required UI behavior was exercised in a running interface.
+- `unit-test-verified` — relevant automated behavioral tests passed.
+- `type-check-only` — static type checking passed, with behavior still unverified.
+- `verifier-blocked` — independent verification could not run; state the blocker.
+- `verifier-failed` — independent verification found a failing requirement.
+
+A behavioral change cannot be accepted as `type-check-only`; add behavioral evidence or leave it blocked/failed.
+
+### 5. Budget
 
 Set limits to prevent endless loops:
 

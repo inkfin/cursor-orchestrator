@@ -5,7 +5,7 @@ Cursor-native **policy pack** for specialist-lane orchestration (OMO-style hub-a
 It provides:
 
 - **8 custom subagents** under `agents/` (including independent `verifier`)
-- **4 workflow skills** under `skills/`
+- **7 workflow skills** under `skills/`
 - **Task-contract hook** under `hooks/` (writer dispatch guard)
 - One always-on routing rule under `rules/`
 
@@ -13,13 +13,14 @@ Models live in each agent's `model:` frontmatter. Context7 and other MCP servers
 
 Herdr fleet management, peer mailbox files, and session hooks stay outside this plugin.
 
-## What v0.2 adds
+## What v0.3 adds
 
 - **Single-writer default** — UI to `designer`, implementation to `fixer`; parent does not edit owned paths while a writer runs
 - **Local worktree parallel** only when packages are independent, paths do not overlap, and there are no shared schema/lock/generated files, and each writer carries a real `git_branch`; **cloud subagents forbidden**
 - **Independent `verifier`** lane after reconciliation
 - **Hooks** enforce writer task contracts (Owned paths, Scope, Verification, Execution mode)
-- **Skills** for verification planning, deep work, reflection, and GUI canvas output
+- **Four task routes** — read-only investigation, scratch prototype, collaborative debugging, and formal implementation/deepwork
+- **Skills** add disposable prototyping, evidence-driven integration debugging, and sparse overnight experiment watching
 
 ## This plugin lives in a marketplace repo
 
@@ -79,6 +80,13 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 
 **Parallel writers** use Cursor native **local worktree** isolation only, and every parallel writer must be dispatched with a real non-empty `git_branch`. Parent integrates sequentially.
 
+### Four task routes
+
+1. **Read-only investigation** uses read-only lanes without writer ceremony.
+2. **Scratch prototype** lets the parent write only declared scratch/temporary paths. Product code remains read-only; promotion requires new Scope, Owned paths, and Verification and a `fixer`/`designer`.
+3. **Collaborative debugging** separates local reproduction, collaborator reports, and environment differences. No guessed fix before reproduction identifies a code cause.
+4. **Formal implementation/deepwork** uses writer contracts and independent verification; deepwork is reserved for genuinely large coordinated work.
+
 ## Agents (8)
 
 | Agent | Role |
@@ -91,7 +99,7 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 | `operator` | Named CLI / CI / logs (no repo writes) |
 | `verifier` | Post-implementation verification (read-only) |
 
-## Skills (4)
+## Skills (7)
 
 | Skill | When |
 |---|---|
@@ -99,6 +107,13 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 | `deepwork` | Large refactors; local worktree allocation |
 | `reflect` | Explicit only — process retrospective |
 | `visual-analysis` | GUI canvas for standalone analytical reports (IDE surface only) |
+| `prototype-lite` | Throwaway local prototypes in declared scratch paths |
+| `collab-debug` | Evidence-driven cross-machine or cross-team diagnosis |
+| `goal-watch` | Explicit overnight experiment watching with sparse wakeups |
+
+### Goal-watch boundary
+
+`goal-watch` targets one independently running server job under a persistent `cursor-agent` CLI session. It uses a goal file plus one-shot `/loop` sleep/sentinel or a single event watcher; frequent agent polling and Ralph prompt reinjection are forbidden. The goal predeclares predicates, job commands and handles, tuning limits, hard stop conditions, and idempotent recovery state. `operator` executes only declared start/stop/read commands and does not invent kill actions. One goal controls one job, and wakeups are not guaranteed if the machine or `cursor-agent` stops.
 
 ## Hooks
 
@@ -146,7 +161,7 @@ Its frontmatter declares `metadata.surfaces: [ide]`, so the skill is scoped to t
 ├── cursor-orchestrator/              # this plugin
 │   ├── .cursor-plugin/plugin.json
 │   ├── agents/                       # 8 subagents
-│   ├── skills/                       # 4 skills
+│   ├── skills/                       # 7 skills
 │   ├── hooks/
 │   │   ├── hooks.json
 │   │   └── task-contract-guard.py

@@ -26,4 +26,12 @@ The parent provides: original requirements, owned paths, expected verification c
 
 For architectural risk, ambiguous requirements, or high-blast-radius concerns, recommend escalating to `oracle` (and `oracle-sol` when the decision is hard to reverse). Do not attempt fixes yourself.
 
-Report: verdict first, then requirement checklist, diff notes, evidence summary, and escalations.
+## Final report
+
+Keep the acceptance handoff short:
+
+- **Status** — `success`, `partial`, or `blocked`, with verdict `pass`, `pass with advisories`, or `fail`
+- **Summary** — requirement coverage and ranked findings
+- **Verification** — commands/evidence actually checked and their results
+- **Deviations / blockers** — scope issues, missing evidence, or `none`
+- **Suggested follow-ups** — fixes or escalation recommendations, or `none`

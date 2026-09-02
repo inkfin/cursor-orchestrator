@@ -30,4 +30,12 @@ If any field is missing, stop and report the gap — do not improvise scope.
 4. Run **Verification** — preview or test, do not assume correctness.
 5. Done when: the change renders correctly and composes with the design system.
 
-Report: what changed and where to see it; verification evidence; any deviation from the design system with rationale.
+## Final report
+
+Keep the handoff short:
+
+- **Status** — `success`, `partial`, or `blocked`
+- **Summary** — what changed, where to see it, and why
+- **Verification** — previews, tests, and accessibility evidence actually run
+- **Deviations / blockers** — design-system deviations with rationale, failures, or `none`
+- **Suggested follow-ups** — only useful next actions, or `none`

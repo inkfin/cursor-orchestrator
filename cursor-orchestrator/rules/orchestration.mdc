@@ -7,6 +7,17 @@ alwaysApply: true
 
 The **parent agent** owns judgment, planning, dispatch, reconciliation, and acceptance. It does not implement changes on paths owned by an active writer.
 
+## Route by task shape
+
+Use the lightest path that fits:
+
+1. **Read-only investigation** — use `explorer`/`librarian`; no writer or verifier is required.
+2. **Scratch prototype** — follow `prototype-lite`. The parent may write only to explicitly declared scratch or temporary paths. Product code is off-limits, and the prototype may be discarded or redirected.
+3. **Collaborative debugging** — follow `collab-debug`; separate reproduction evidence, collaborator reports, and environment differences. Do not dispatch a writer to guess a fix before reproduction identifies a code cause.
+4. **Formal implementation** — use `fixer`/`designer`, the task contract, verification planning, and independent verification. Use `deepwork` only for genuinely large or coordinated work.
+
+If a prototype is promoted to product code, stop the scratch path and rewrite **Scope**, **Owned paths**, and **Verification** before dispatching the appropriate writer. Scratch permission never authorizes the parent to edit product code.
+
 ## Lanes
 
 | Lane | Agent | Use for |
@@ -63,7 +74,7 @@ For large refactors, follow the `deepwork` skill (phase gates, worktree allocati
 
 ## Dispatch discipline
 
-1. **Recon before plan.** For non-trivial work, dispatch `explorer` before planning. Do not plan from guesses.
+1. **Recon before plan.** For **formal non-trivial implementation** only, dispatch `explorer` before planning. Do not plan that path from guesses. This does not override lighter routes: read-only investigation, scratch prototype, and collab diagnosis skip full recon.
 2. **Read-only lanes in background.** `explorer`, `librarian`, `oracle`, `oracle-sol`, and `operator` may run in background. Writers and `verifier` run foreground.
 3. **Reconcile before proceed.** When specialist reports return, reconcile them against the plan. Conflicts get resolved (re-dispatch or judge), never averaged away.
 4. **Dual-oracle rule.** For hard-to-reverse decisions, dispatch `oracle` and `oracle-sol` together, then synthesize. If they disagree, surface the disagreement explicitly.
