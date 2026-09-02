@@ -47,6 +47,29 @@ ln -sfn "$PWD/cursor-orchestrator" ~/.cursor/plugins/local/cursor-orchestrator
 
 Then run **Developer: Reload Window**.
 
+## Publishing an update
+
+Observed on `agent` CLI 2026.08.11-e8db854:
+
+- `agent plugin marketplace add` pins the marketplace to the **commit** that
+  was current when it ran, recorded as `gitRef`. Later pushes are not picked up.
+- `agent plugin marketplace update <name>` prints `✓ Updated ... 0 plugins
+  indexed` but does **not** re-index: `lastIndexedAt` stays unchanged. Do not
+  trust its output.
+- `agent plugin marketplace remove <url>` matches by URL and removes **every**
+  marketplace sharing that URL, not just the named one.
+
+So a push only reaches installs after re-adding:
+
+```bash
+agent plugin marketplace remove <marketplace-name>
+agent plugin marketplace add https://github.com/inkfin/cursor-orchestrator
+agent plugin marketplace list --format json   # confirm gitRef and lastIndexedAt moved
+```
+
+The marketplace name registered by `add` comes from `marketplace.json`'s `name`
+field, not from the repo or owner.
+
 ## Development
 
 `scripts/` and `tests/` are repo tooling and are not shipped as plugin
