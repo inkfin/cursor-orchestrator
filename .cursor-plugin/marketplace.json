@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "cursor-orchestrator",
-      "source": "./",
+      "source": "cursor-orchestrator",
       "description": "Cursor-native policy pack: specialist lanes, single-writer orchestration, verification, and task-contract hooks."
     }
   ]

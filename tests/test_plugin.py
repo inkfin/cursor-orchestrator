@@ -9,8 +9,9 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-GUARD = REPO_ROOT / "hooks" / "task-contract-guard.py"
-HOOKS_JSON = REPO_ROOT / "hooks" / "hooks.json"
+PLUGIN_DIR = REPO_ROOT / "cursor-orchestrator"
+GUARD = PLUGIN_DIR / "hooks" / "task-contract-guard.py"
+HOOKS_JSON = PLUGIN_DIR / "hooks" / "hooks.json"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 VALIDATE = REPO_ROOT / "scripts" / "validate_plugin.py"
 
@@ -178,11 +179,18 @@ class HooksManifestTests(unittest.TestCase):
 
 class PluginManifestTests(unittest.TestCase):
     def test_plugin_json_declares_component_paths(self) -> None:
-        plugin = json.loads((REPO_ROOT / ".cursor-plugin" / "plugin.json").read_text())
+        plugin = json.loads((PLUGIN_DIR / ".cursor-plugin" / "plugin.json").read_text())
         self.assertEqual(plugin.get("agents"), "./agents/")
         self.assertEqual(plugin.get("skills"), "./skills/")
         self.assertEqual(plugin.get("rules"), "./rules/")
         self.assertEqual(plugin.get("hooks"), "./hooks/hooks.json")
+
+    def test_marketplace_source_points_at_plugin_subdirectory(self) -> None:
+        marketplace = json.loads((REPO_ROOT / ".cursor-plugin" / "marketplace.json").read_text())
+        sources = [p.get("source") for p in marketplace.get("plugins", [])]
+        self.assertIn("cursor-orchestrator", sources)
+        for source in sources:
+            self.assertNotIn(source, ("./", ".", ""))
 
 
 class ValidatePluginScriptTests(unittest.TestCase):

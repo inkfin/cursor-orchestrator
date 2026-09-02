@@ -9,12 +9,15 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-PLUGIN_JSON = REPO / ".cursor-plugin" / "plugin.json"
+PLUGIN_SOURCE = "cursor-orchestrator"
+PLUGIN_DIR = REPO / PLUGIN_SOURCE
 MARKETPLACE_JSON = REPO / ".cursor-plugin" / "marketplace.json"
-HOOKS_JSON = REPO / "hooks" / "hooks.json"
-AGENTS_DIR = REPO / "agents"
-SKILLS_DIR = REPO / "skills"
-GUARD = REPO / "hooks" / "task-contract-guard.py"
+PLUGIN_JSON = PLUGIN_DIR / ".cursor-plugin" / "plugin.json"
+HOOKS_JSON = PLUGIN_DIR / "hooks" / "hooks.json"
+AGENTS_DIR = PLUGIN_DIR / "agents"
+SKILLS_DIR = PLUGIN_DIR / "skills"
+RULES_DIR = PLUGIN_DIR / "rules"
+GUARD = PLUGIN_DIR / "hooks" / "task-contract-guard.py"
 
 EXPECTED_AGENTS = {
     "designer",
@@ -87,8 +90,18 @@ def main() -> int:
 
     marketplace = check_json(MARKETPLACE_JSON)
     plugins = marketplace.get("plugins") or []
-    if not any(p.get("source") == "./" for p in plugins):
-        errors.append("marketplace.json must retain source './' entry")
+    sources = [p.get("source") for p in plugins]
+    if PLUGIN_SOURCE not in sources:
+        errors.append(f"marketplace.json needs a plugin entry with source {PLUGIN_SOURCE!r}, got {sources}")
+    # A root self-reference indexes to zero plugins.
+    if any(s in ("./", ".", "") for s in sources):
+        errors.append("marketplace.json source must be a plugin subdirectory, not a repo-root self-reference")
+
+    # The marketplace manifest belongs to the repo, not the plugin.
+    if (PLUGIN_DIR / ".cursor-plugin" / "marketplace.json").exists():
+        errors.append("marketplace.json must not live inside the plugin directory")
+    if not RULES_DIR.is_dir():
+        errors.append(f"Missing {PLUGIN_SOURCE}/rules/")
 
     # Agents
     agent_files = sorted(AGENTS_DIR.glob("*.md"))
