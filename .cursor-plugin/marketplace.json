@@ -1,8 +1,7 @@
 {
   "name": "cursor-orchestrator",
   "owner": {
-    "name": "inkfin",
-    "url": "https://github.com/inkfin"
+    "name": "inkfin"
   },
   "metadata": {
     "description": "Cursor-native policy pack: specialist lanes, single-writer orchestration, verification, and task-contract hooks."

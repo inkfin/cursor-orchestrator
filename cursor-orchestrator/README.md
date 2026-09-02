@@ -28,8 +28,11 @@ This directory is the plugin: `.cursor-plugin/plugin.json` plus the default
 
 The **repository root** one level up is the marketplace: it holds
 `.cursor-plugin/marketplace.json`, which lists this plugin with
-`"source": "cursor-orchestrator"`. A marketplace entry must point at a plugin
-subdirectory; `"./"` self-reference indexes to zero plugins.
+`"source": "cursor-orchestrator"`.
+
+That manifest is schema-validated with `additionalProperties: false`, so any
+unsupported key makes the marketplace index zero plugins without reporting an
+error. See the [repo README](../README.md) for the allowed keys.
 
 ## How to install
 

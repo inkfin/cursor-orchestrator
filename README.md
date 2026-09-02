@@ -20,8 +20,20 @@ The repository root is the **marketplace**; each plugin is a subdirectory.
 └── tests/
 ```
 
-`marketplace.json` entries must set `source` to a plugin **subdirectory**.
-A `"./"` self-reference indexes to zero plugins.
+`marketplace.json` is validated against Cursor's
+[`marketplace.schema.json`](https://github.com/cursor/plugins/blob/main/schemas/marketplace.schema.json),
+which sets `additionalProperties: false` at every level. A single unsupported
+key (for example `owner.url`) fails the whole manifest and the marketplace
+indexes to **zero plugins** with no error message. Allowed keys:
+
+| Object | Keys |
+|---|---|
+| root | `name`, `owner`, `metadata`, `plugins` |
+| `owner` | `name`, `email` |
+| plugin entry | `name`, `source`, `description`, `minClientVersions` |
+
+`scripts/validate_plugin.py` checks this, since the indexer reports the failure
+only as a zero count.
 
 ## Install
 

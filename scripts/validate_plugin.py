@@ -30,6 +30,11 @@ EXPECTED_AGENTS = {
     "verifier",
 }
 
+# Mirrors cursor/plugins schemas/marketplace.schema.json (additionalProperties: false).
+MARKETPLACE_KEYS = {"name", "owner", "metadata", "plugins"}
+OWNER_KEYS = {"name", "email"}
+PLUGIN_ENTRY_KEYS = {"name", "source", "description", "minClientVersions"}
+
 EXPECTED_SKILLS = {
     "deepwork",
     "reflect",
@@ -88,14 +93,29 @@ def main() -> int:
     if not plugin.get("agents"):
         errors.append("plugin.json missing agents path")
 
+    # marketplace.schema.json sets additionalProperties: false at every level,
+    # so one stray key silently indexes the whole marketplace to zero plugins.
     marketplace = check_json(MARKETPLACE_JSON)
+    extra_top = set(marketplace) - MARKETPLACE_KEYS
+    if extra_top:
+        errors.append(f"marketplace.json has unsupported top-level keys: {sorted(extra_top)}")
+    for required in ("name", "plugins"):
+        if required not in marketplace:
+            errors.append(f"marketplace.json missing required key {required!r}")
+
+    owner = marketplace.get("owner", {})
+    extra_owner = set(owner) - OWNER_KEYS
+    if extra_owner:
+        errors.append(f"marketplace.json owner has unsupported keys: {sorted(extra_owner)} (only name, email)")
+
     plugins = marketplace.get("plugins") or []
+    for entry in plugins:
+        extra_entry = set(entry) - PLUGIN_ENTRY_KEYS
+        if extra_entry:
+            errors.append(f"marketplace.json plugin entry has unsupported keys: {sorted(extra_entry)}")
     sources = [p.get("source") for p in plugins]
     if PLUGIN_SOURCE not in sources:
         errors.append(f"marketplace.json needs a plugin entry with source {PLUGIN_SOURCE!r}, got {sources}")
-    # A root self-reference indexes to zero plugins.
-    if any(s in ("./", ".", "") for s in sources):
-        errors.append("marketplace.json source must be a plugin subdirectory, not a repo-root self-reference")
 
     # The marketplace manifest belongs to the repo, not the plugin.
     if (PLUGIN_DIR / ".cursor-plugin" / "marketplace.json").exists():

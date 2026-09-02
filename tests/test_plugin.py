@@ -189,8 +189,16 @@ class PluginManifestTests(unittest.TestCase):
         marketplace = json.loads((REPO_ROOT / ".cursor-plugin" / "marketplace.json").read_text())
         sources = [p.get("source") for p in marketplace.get("plugins", [])]
         self.assertIn("cursor-orchestrator", sources)
-        for source in sources:
-            self.assertNotIn(source, ("./", ".", ""))
+
+    def test_marketplace_conforms_to_closed_schema(self) -> None:
+        """One unsupported key indexes the whole marketplace to zero plugins."""
+        marketplace = json.loads((REPO_ROOT / ".cursor-plugin" / "marketplace.json").read_text())
+        self.assertLessEqual(set(marketplace), {"name", "owner", "metadata", "plugins"})
+        self.assertLessEqual(set(marketplace.get("owner", {})), {"name", "email"})
+        for entry in marketplace.get("plugins", []):
+            self.assertLessEqual(
+                set(entry), {"name", "source", "description", "minClientVersions"}
+            )
 
 
 class ValidatePluginScriptTests(unittest.TestCase):
