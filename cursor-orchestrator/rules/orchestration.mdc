@@ -68,7 +68,7 @@ When parallel:
 - Parent defines owned paths, integration order, and merge sequence
 - Apply results **sequentially**, then verify after each integration step
 
-**Cloud subagents are forbidden.** Never dispatch `environment: cloud` or cloud worktrees for implementation writers. A `preToolUse` hook on the `Task` tool denies any dispatch with `environment: cloud`; a `git_branch` containing `cloud` is denied as well.
+**Cloud subagents are forbidden.** Never dispatch `environment: cloud` or cloud worktrees for implementation writers. A `preToolUse` hook on the `Task` tool denies cloud execution and incomplete writer contracts (Owned paths, Scope, Verification, Execution mode); a `git_branch` containing `cloud` is denied as well. `subagentStart` repeats the same writer checks when that event fires.
 
 For large refactors, follow the `deepwork` skill (phase gates, worktree allocation, repair budget).
 

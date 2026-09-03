@@ -54,7 +54,7 @@ Parent responsibilities:
 
 ## Forbidden
 
-- **Cloud subagents** (`environment: cloud`, cloud worktrees) for implementation — the `preToolUse` hook on `Task` denies these before dispatch
+- **Cloud subagents** (`environment: cloud`, cloud worktrees) for implementation — the `preToolUse` hook on `Task` denies these before dispatch, and also denies writer Tasks that omit the four contract fields
 - Overlapping owned paths across parallel writers
 - Writers dispatching further subagents
 

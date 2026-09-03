@@ -137,7 +137,7 @@ class PreToolUseTaskTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertEqual(out.get("permission"), "deny")
 
-    def test_local_task_allowed(self) -> None:
+    def test_local_writer_with_contract_allowed(self) -> None:
         code, out = run_fixture("pretooluse_task_local.json")
         self.assertEqual(code, 0)
         self.assertEqual(out.get("permission"), "allow")
@@ -153,17 +153,24 @@ class PreToolUseTaskTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(out.get("permission"), "allow")
 
-    def test_pretooluse_does_not_enforce_writer_contract(self) -> None:
-        """Contract enforcement belongs to subagentStart, not the tool gate."""
-        code, out = run_guard(
-            {
-                "hook_event_name": "preToolUse",
-                "tool_name": "Task",
-                "tool_input": {"subagent_type": "fixer", "prompt": "just do it"},
-            }
-        )
+    def test_pretooluse_enforces_writer_contract(self) -> None:
+        """CLI reliably fires preToolUse; contract must be gated here."""
+        code, out = run_fixture("pretooluse_task_writer_missing_contract.json")
+        self.assertEqual(code, 2)
+        self.assertEqual(out.get("permission"), "deny")
+        self.assertIn("Owned paths", out.get("user_message", ""))
+        self.assertIn("Owned paths", out.get("agent_message", ""))
+
+    def test_pretooluse_non_writer_skips_contract(self) -> None:
+        code, out = run_fixture("pretooluse_task_explorer_ok.json")
         self.assertEqual(code, 0)
         self.assertEqual(out.get("permission"), "allow")
+
+    def test_pretooluse_parallel_without_branch_denied(self) -> None:
+        code, out = run_fixture("pretooluse_task_parallel_no_branch.json")
+        self.assertEqual(code, 2)
+        self.assertEqual(out.get("permission"), "deny")
+        self.assertIn("git_branch", out.get("user_message", ""))
 
 
 class HooksManifestTests(unittest.TestCase):
@@ -181,7 +188,7 @@ class HooksManifestTests(unittest.TestCase):
 class PluginManifestTests(unittest.TestCase):
     def test_plugin_json_declares_component_paths(self) -> None:
         plugin = json.loads((PLUGIN_DIR / ".cursor-plugin" / "plugin.json").read_text())
-        self.assertEqual(plugin.get("version"), "0.3.0")
+        self.assertEqual(plugin.get("version"), "0.3.1")
         self.assertEqual(plugin.get("agents"), "./agents/")
         self.assertEqual(plugin.get("skills"), "./skills/")
         self.assertEqual(plugin.get("rules"), "./rules/")

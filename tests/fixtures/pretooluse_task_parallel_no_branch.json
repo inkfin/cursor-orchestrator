@@ -1,0 +1,9 @@
+{
+  "hook_event_name": "preToolUse",
+  "tool_name": "Task",
+  "tool_input": {
+    "subagent_type": "designer",
+    "description": "Parallel header restyle",
+    "prompt": "Owned paths: src/components/**\nScope: restyle header\nVerification: npm run storybook\nExecution mode: parallel/worktree\nWork on the dispatched local worktree branch."
+  }
+}

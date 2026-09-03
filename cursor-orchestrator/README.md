@@ -119,16 +119,17 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 
 `hooks/hooks.json` runs `task-contract-guard.py` on two events.
 
-**`subagentStart`** (matcher `fixer|designer`):
+**`preToolUse`** (matcher `Task`) — primary gate (CLI reliably fires this):
 
-- Validates **Owned paths**, **Scope**, **Verification**, **Execution mode**
-- Parallel/worktree work requires a real non-empty `git_branch` in the dispatch payload; task text describing a local worktree is not accepted. `is_parallel_worker: true` counts as parallel even when the text says `Execution mode: single`
-- Rejects cloud execution in the task text and any `git_branch` containing `cloud`
+- For `fixer` / `designer`, requires **Owned paths**, **Scope**, **Verification**, **Execution mode** in the Task `prompt`
+- Parallel/worktree prompts require a real non-empty `git_branch` on the tool input; prompt text claiming a local worktree is not enough
+- Denies `environment: cloud` (case-insensitive), explicit cloud-execution requests in the prompt, and any `git_branch` containing `cloud`
+- Non-writer lanes (`explorer`, `oracle`, …) skip the writer contract and only hit the cloud checks
 
-**`preToolUse`** (matcher `Task`):
+**`subagentStart`** (matcher `fixer|designer`) — kept for surfaces that still emit it:
 
-- Denies `Task` dispatches with `environment: cloud` (case-insensitive) or an explicit cloud-execution request in the prompt
-- Local `Task` dispatches pass through; the writer contract itself is still enforced at `subagentStart`, not here
+- Same writer contract against the `task` field
+- Same parallel/`git_branch` and cloud-branch rules as above
 
 Both entries set **`failClosed: true`** — a hook crash or invalid JSON **denies** dispatch (safer default; requires `python3` on PATH when the hook fires).
 

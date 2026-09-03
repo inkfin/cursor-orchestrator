@@ -85,8 +85,8 @@ def main() -> int:
             errors.append(f"Invalid JSON {path}: {exc}")
 
     plugin = check_json(PLUGIN_JSON)
-    if plugin.get("version") != "0.3.0":
-        errors.append(f"plugin.json version expected 0.3.0, got {plugin.get('version')}")
+    if plugin.get("version") != "0.3.1":
+        errors.append(f"plugin.json version expected 0.3.1, got {plugin.get('version')}")
     if not plugin.get("hooks"):
         errors.append("plugin.json missing hooks path")
     if not plugin.get("skills"):
