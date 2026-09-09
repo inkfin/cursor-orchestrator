@@ -188,7 +188,7 @@ class HooksManifestTests(unittest.TestCase):
 class PluginManifestTests(unittest.TestCase):
     def test_plugin_json_declares_component_paths(self) -> None:
         plugin = json.loads((PLUGIN_DIR / ".cursor-plugin" / "plugin.json").read_text())
-        self.assertEqual(plugin.get("version"), "0.3.1")
+        self.assertEqual(plugin.get("version"), "0.3.2")
         self.assertEqual(plugin.get("agents"), "./agents/")
         self.assertEqual(plugin.get("skills"), "./skills/")
         self.assertEqual(plugin.get("rules"), "./rules/")
@@ -269,6 +269,72 @@ class PstackLiteSkillTests(unittest.TestCase):
         )
 
 
+class OrcSkillTests(unittest.TestCase):
+    def skill_text(self) -> str:
+        path = SKILLS_DIR / "orc" / "SKILL.md"
+        self.assertTrue(path.is_file())
+        return path.read_text()
+
+    def test_frontmatter_explicit_only(self) -> None:
+        text = self.skill_text()
+        self.assertTrue(text.startswith("---\n"))
+        self.assertIn("name: orc", text)
+        self.assertIn("disable-model-invocation: true", text)
+        self.assertIn("主动安排任务", text)
+        self.assertNotIn("alwaysApply", text)
+        self.assertNotIn("orc-orchestrate", text)
+
+    def test_dispatch_by_default_override(self) -> None:
+        text = self.skill_text()
+        self.assertIn("do the work yourself", text)
+        self.assertIn("Dispatch by default", text)
+
+    def test_mentions_scout_for_patrol(self) -> None:
+        text = self.skill_text()
+        self.assertIn("`scout`", text)
+        self.assertIn("log harvest", text)
+        self.assertIn("Patrol", text)
+
+    def test_does_not_require_project_rule_install(self) -> None:
+        text = self.skill_text()
+        self.assertNotIn("init-project-rules", text)
+        self.assertNotRegex(
+            text,
+            r"(?i)(copy|install|inject|write (this )?into).{0,80}(AGENTS\.md|\.cursor/rules)",
+        )
+
+    def test_no_leftover_old_skill_ids(self) -> None:
+        self.assertFalse((SKILLS_DIR / "orc-orchestrate").exists())
+        self.assertFalse((SKILLS_DIR / "orchestrate").exists())
+
+
+class OrcPatrolSkillTests(unittest.TestCase):
+    def test_orc_patrol_skill(self) -> None:
+        path = SKILLS_DIR / "orc-patrol" / "SKILL.md"
+        self.assertTrue(path.is_file())
+        text = path.read_text()
+        self.assertTrue(text.startswith("---\n"))
+        self.assertIn("name: orc-patrol", text)
+        self.assertIn("disable-model-invocation: true", text)
+        self.assertIn("scout", text)
+        self.assertIn("巡查", text)
+
+
+class ScoutAgentTests(unittest.TestCase):
+    def test_scout_agent_frontmatter_and_body(self) -> None:
+        path = PLUGIN_DIR / "agents" / "scout.md"
+        self.assertTrue(path.is_file())
+        text = path.read_text()
+        self.assertTrue(text.startswith("---\n"))
+        self.assertIn("name: scout", text)
+        self.assertIn("optimize_for=cost", text)
+        self.assertIn("is_background: true", text)
+        self.assertNotIn("readonly: true", text)
+        self.assertIn(".cursor/scout-logs", text)
+        self.assertIn("run an experiment", text)
+        self.assertIn("use `operator`", text)
+
+
 class ValidatePluginScriptTests(unittest.TestCase):
     def test_validate_plugin_exits_zero(self) -> None:
         proc = subprocess.run(
@@ -283,6 +349,16 @@ class ValidatePluginScriptTests(unittest.TestCase):
             0,
             msg=proc.stdout + proc.stderr,
         )
+        self.assertIn("agents: 9", proc.stdout)
+        self.assertIn("skills: 9", proc.stdout)
+
+    def test_readme_counts_nine(self) -> None:
+        plugin = (PLUGIN_DIR / "README.md").read_text()
+        self.assertIn("Agents (9)", plugin)
+        self.assertIn("Skills (9)", plugin)
+        root = (REPO_ROOT / "README.md").read_text()
+        self.assertIn("9 subagents", root)
+        self.assertIn("9 workflow skills", root)
 
 
 if __name__ == "__main__":

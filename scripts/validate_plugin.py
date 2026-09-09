@@ -27,6 +27,7 @@ EXPECTED_AGENTS = {
     "operator",
     "oracle",
     "oracle-sol",
+    "scout",
     "verifier",
 }
 
@@ -39,6 +40,8 @@ EXPECTED_SKILLS = {
     "collab-debug",
     "deepwork",
     "goal-watch",
+    "orc",
+    "orc-patrol",
     "prototype-lite",
     "reflect",
     "verification-planning",
@@ -85,8 +88,8 @@ def main() -> int:
             errors.append(f"Invalid JSON {path}: {exc}")
 
     plugin = check_json(PLUGIN_JSON)
-    if plugin.get("version") != "0.3.1":
-        errors.append(f"plugin.json version expected 0.3.1, got {plugin.get('version')}")
+    if plugin.get("version") != "0.3.2":
+        errors.append(f"plugin.json version expected 0.3.2, got {plugin.get('version')}")
     if not plugin.get("hooks"):
         errors.append("plugin.json missing hooks path")
     if not plugin.get("skills"):
@@ -162,6 +165,16 @@ def main() -> int:
     if "effort=high" not in model or "context=" in model or "reasoning=" in model:
         errors.append(f"oracle-sol model must use effort=high syntax, got {model!r}")
 
+    # scout: background, cheap; must write log files so not readonly
+    scout_meta = parse_frontmatter(AGENTS_DIR / "scout.md")
+    if scout_meta.get("is_background") != "true":
+        errors.append("scout: is_background must be true")
+    if scout_meta.get("readonly") == "true":
+        errors.append("scout: must not set readonly: true")
+    scout_model = scout_meta.get("model", "")
+    if "optimize_for=cost" not in scout_model:
+        errors.append(f"scout model must use optimize_for=cost, got {scout_model!r}")
+
     # Skills
     if not SKILLS_DIR.is_dir():
         errors.append("skills/ directory missing")
@@ -186,6 +199,14 @@ def main() -> int:
         reflect_meta = parse_frontmatter(SKILLS_DIR / "reflect" / "SKILL.md")
         if reflect_meta.get("disable-model-invocation") != "true":
             errors.append("reflect skill must set disable-model-invocation: true")
+
+        orc_meta = parse_frontmatter(SKILLS_DIR / "orc" / "SKILL.md")
+        if orc_meta.get("disable-model-invocation") != "true":
+            errors.append("orc skill must set disable-model-invocation: true")
+
+        patrol_meta = parse_frontmatter(SKILLS_DIR / "orc-patrol" / "SKILL.md")
+        if patrol_meta.get("disable-model-invocation") != "true":
+            errors.append("orc-patrol skill must set disable-model-invocation: true")
 
     # Hook script executable
     if not GUARD.is_file():

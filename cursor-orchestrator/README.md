@@ -1,39 +1,25 @@
 # cursor-orchestrator
 
-Cursor-native **policy pack** for specialist-lane orchestration (OMO-style hub-and-spoke without a separate runtime).
+Cursor-native **policy pack** for specialist-lane orchestration (hub-and-spoke without a separate runtime). Version **0.3.2**.
 
-It provides:
+It ships:
 
-- **8 custom subagents** under `agents/` (including independent `verifier`)
-- **7 workflow skills** under `skills/`
-- **Task-contract hook** under `hooks/` (writer dispatch guard)
+- **9 custom subagents** under `agents/`
+- **9 workflow skills** under `skills/`
+- A writer **task-contract hook** under `hooks/`
 - One always-on routing rule under `rules/`
 
-Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled; install them separately.
+Routing lives in `rules/orchestration.mdc`. Explicit dispatch is skill `orc`. Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled.
 
 Herdr fleet management, peer mailbox files, and session hooks stay outside this plugin.
 
-## What v0.3 adds
-
-- **Single-writer default** — UI to `designer`, implementation to `fixer`; parent does not edit owned paths while a writer runs
-- **Local worktree parallel** only when packages are independent, paths do not overlap, and there are no shared schema/lock/generated files, and each writer carries a real `git_branch`; **cloud subagents forbidden**
-- **Independent `verifier`** lane after reconciliation
-- **Hooks** enforce writer task contracts (Owned paths, Scope, Verification, Execution mode)
-- **Four task routes** — read-only investigation, scratch prototype, collaborative debugging, and formal implementation/deepwork
-- **Skills** add disposable prototyping, evidence-driven integration debugging, and sparse overnight experiment watching
-
 ## This plugin lives in a marketplace repo
 
-This directory is the plugin: `.cursor-plugin/plugin.json` plus the default
-`agents/`, `rules/`, `skills/`, and `hooks/` folders.
+This directory is the plugin: `.cursor-plugin/plugin.json` plus `agents/`, `rules/`, `skills/`, and `hooks/`.
 
-The **repository root** one level up is the marketplace: it holds
-`.cursor-plugin/marketplace.json`, which lists this plugin with
-`"source": "cursor-orchestrator"`.
+The **repository root** one level up is the marketplace. It holds `.cursor-plugin/marketplace.json`, which lists this plugin with `"source": "cursor-orchestrator"`.
 
-That manifest is schema-validated with `additionalProperties: false`, so any
-unsupported key makes the marketplace index zero plugins without reporting an
-error. See the [repo README](../README.md) for the allowed keys.
+That manifest is schema-validated with `additionalProperties: false`, so any unsupported key makes the marketplace index zero plugins without reporting an error. See the [repo README](../README.md) for the allowed keys.
 
 ## How to install
 
@@ -59,7 +45,7 @@ plugin with the same `name` shadows this local copy.
 
 ### CLI
 
-On local `agent` 2026.08.11-e8db854, `--plugin-dir` discovers the 8 agents but does **not** inject this plugin's rules or skills into the session. The official continual-learning plugin's skill shows the same gap — a current CLI/component limitation.
+On local `agent` 2026.08.11-e8db854, `--plugin-dir` discovers the 9 agents but does **not** inject this plugin's rules or skills into the session. The official continual-learning plugin's skill shows the same gap, a current CLI/component limitation.
 
 ```bash
 agent --plugin-dir /path/to/cursor-orchestrator/cursor-orchestrator ...
@@ -69,73 +55,50 @@ Some builds also accept `cursor-agent --plugin-dir`. Do not treat `--plugin-dir`
 
 After IDE local or marketplace install, run **Developer: Reload Window** and confirm rule, skills, and hooks in Customize.
 
-## Orchestration model
+## Agents (9)
 
-| Role | Responsibility |
+| Agent | Job |
 |---|---|
-| Parent agent | Judge, plan, dispatch, reconcile, accept |
-| `fixer` / `designer` | Sole writers (foreground); require full task contract |
-| `verifier` | Independent read-only acceptance |
-| Other lanes | Read-only or ops; leaf agents never delegate |
+| `explorer` | Local codebase recon (read-only) |
+| `librarian` | External docs, APIs, web facts (read-only) |
+| `operator` | Named CLI: start, stop, submit, poll/watch |
+| `scout` | Patrol / 巡查 and log harvest |
+| `oracle` | Last-resort architecture / hard debug / review |
+| `oracle-sol` | Second verdict with `oracle` |
+| `fixer` | Product-code writer (non-UI-primary) |
+| `designer` | UI / layout / a11y writer |
+| `verifier` | Post-implementation acceptance (read-only) |
 
-**Parallel writers** use Cursor native **local worktree** isolation only, and every parallel writer must be dispatched with a real non-empty `git_branch`. Parent integrates sequentially.
+Writers (`fixer`, `designer`) run foreground and need the four-field task contract. Parallel writers need a real `git_branch`. Cloud subagents are forbidden. See `rules/orchestration.mdc`.
 
-### Four task routes
-
-1. **Read-only investigation** uses read-only lanes without writer ceremony.
-2. **Scratch prototype** lets the parent write only declared scratch/temporary paths. Product code remains read-only; promotion requires new Scope, Owned paths, and Verification and a `fixer`/`designer`.
-3. **Collaborative debugging** separates local reproduction, collaborator reports, and environment differences. No guessed fix before reproduction identifies a code cause.
-4. **Formal implementation/deepwork** uses writer contracts and independent verification; deepwork is reserved for genuinely large coordinated work.
-
-## Agents (8)
-
-| Agent | Role |
-|---|---|
-| `explorer` | Codebase recon (read-only) |
-| `librarian` | External docs (read-only) |
-| `fixer` | Implementation writer |
-| `designer` | UI writer |
-| `oracle` / `oracle-sol` | Strategic judgment (read-only) |
-| `operator` | Named CLI / CI / logs (no repo writes) |
-| `verifier` | Post-implementation verification (read-only) |
-
-## Skills (7)
+## Skills (9)
 
 | Skill | When |
 |---|---|
-| `verification-planning` | Auto — before non-trivial changes |
+| `verification-planning` | Auto, before non-trivial changes |
 | `deepwork` | Large refactors; local worktree allocation |
-| `reflect` | Explicit only — process retrospective |
-| `visual-analysis` | GUI canvas for standalone analytical reports (IDE surface only) |
+| `reflect` | Explicit only, process retrospective |
+| `orc` | Explicit only; 主动安排任务; user names `orc` / 编排 |
+| `orc-patrol` | Explicit only, 巡查 |
+| `visual-analysis` | GUI canvas for standalone analytical reports (IDE only) |
 | `prototype-lite` | Throwaway local prototypes in declared scratch paths |
 | `collab-debug` | Evidence-driven cross-machine or cross-team diagnosis |
 | `goal-watch` | Explicit overnight experiment watching with sparse wakeups |
 
-### Goal-watch boundary
-
-`goal-watch` targets one independently running server job under a persistent `cursor-agent` CLI session. It uses a goal file plus one-shot `/loop` sleep/sentinel or a single event watcher; frequent agent polling and Ralph prompt reinjection are forbidden. The goal predeclares predicates, job commands and handles, tuning limits, hard stop conditions, and idempotent recovery state. `operator` executes only declared start/stop/read commands and does not invent kill actions. One goal controls one job, and wakeups are not guaranteed if the machine or `cursor-agent` stops.
+`goal-watch` details live in that skill. `visual-analysis` is IDE-only (`metadata.surfaces: [ide]`). Additional workflow commands may later use the `orc-` prefix; `orc` and `orc-patrol` are separate skills.
 
 ## Hooks
 
-`hooks/hooks.json` runs `task-contract-guard.py` on two events.
+`hooks/hooks.json` runs `task-contract-guard.py` on two events. Both set **`failClosed: true`** (needs `python3` on PATH).
 
-**`preToolUse`** (matcher `Task`) — primary gate (CLI reliably fires this):
+| Event | Matcher | What it gates |
+|---|---|---|
+| `preToolUse` | `Task` | Writer contract, parallel `git_branch`, no cloud |
+| `subagentStart` | `fixer\|designer` | Same writer contract on surfaces that still emit it |
 
-- For `fixer` / `designer`, requires **Owned paths**, **Scope**, **Verification**, **Execution mode** in the Task `prompt`
-- Parallel/worktree prompts require a real non-empty `git_branch` on the tool input; prompt text claiming a local worktree is not enough
-- Denies `environment: cloud` (case-insensitive), explicit cloud-execution requests in the prompt, and any `git_branch` containing `cloud`
-- Non-writer lanes (`explorer`, `oracle`, …) skip the writer contract and only hit the cloud checks
+Non-writer lanes skip the writer contract and only hit the cloud checks. The hook does not store state or merge branches.
 
-**`subagentStart`** (matcher `fixer|designer`) — kept for surfaces that still emit it:
-
-- Same writer contract against the `task` field
-- Same parallel/`git_branch` and cloud-branch rules as above
-
-Both entries set **`failClosed: true`** — a hook crash or invalid JSON **denies** dispatch (safer default; requires `python3` on PATH when the hook fires).
-
-The hook guards contracts only; it does not store state or merge branches.
-
-## Models and Router
+## Models
 
 | Agent | Model |
 |---|---|
@@ -144,15 +107,9 @@ The hook guards contracts only; it does not store state or merge branches.
 | `verifier` | `composer-2.5[fast=false]` |
 | `oracle` | `auto-smart[optimize_for=intelligence]` |
 | `oracle-sol` | `gpt-5.6-sol[effort=high,fast=false]` |
-| `librarian`, `operator` | `auto-smart[optimize_for=cost]` |
+| `librarian`, `operator`, `scout` | `auto-smart[optimize_for=cost]` |
 
-**`auto-smart`** routes via Cursor's model router. It requires **Teams or Enterprise** with Router enabled. Without Router, Cursor falls back to the workspace default model — behavior is less predictable; prefer explicit model slugs for critical lanes if Router is unavailable.
-
-## GUI Canvas vs CLI
-
-The `visual-analysis` skill produces interactive **Canvas** (`.canvas.tsx`) in the Cursor IDE using `cursor/canvas` primitives and theme tokens.
-
-Its frontmatter declares `metadata.surfaces: [ide]`, so the skill is scoped to the IDE and should not be assumed to load in **CLI / headless** sessions. The structured-markdown equivalent described inside the skill is this plugin's general reporting policy for headless runs, not a guarantee provided by the skill itself. Canvases are never created in headless mode.
+**`auto-smart`** requires **Teams or Enterprise** with Router enabled. Without Router, Cursor falls back to the workspace default model.
 
 ## Layout
 
@@ -161,8 +118,8 @@ Its frontmatter declares `metadata.surfaces: [ide]`, so the skill is scoped to t
 ├── .cursor-plugin/marketplace.json   # marketplace: lists the plugin below
 ├── cursor-orchestrator/              # this plugin
 │   ├── .cursor-plugin/plugin.json
-│   ├── agents/                       # 8 subagents
-│   ├── skills/                       # 7 skills
+│   ├── agents/                       # 9 subagents
+│   ├── skills/                       # 9 skills
 │   ├── hooks/
 │   │   ├── hooks.json
 │   │   └── task-contract-guard.py
@@ -184,7 +141,7 @@ python3 scripts/validate_plugin.py
 python3 -m unittest discover -s tests -v
 ```
 
-**Cursor UI reload** is not automated here. After install, use **Developer: Reload Window** and confirm agents/skills/hooks appear in Customize. Hook behavior requires dispatching a `fixer` or `designer` subagent in a GUI session.
+After install, use **Developer: Reload Window** and confirm agents/skills/hooks appear in Customize.
 
 ## Publishing
 
