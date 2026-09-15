@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -17,10 +18,10 @@ VALIDATE = REPO_ROOT / "scripts" / "validate_plugin.py"
 SKILLS_DIR = PLUGIN_DIR / "skills"
 
 
-def run_guard(payload: dict) -> tuple[int, dict]:
+def run_guard_raw(payload: str) -> tuple[int, dict]:
     proc = subprocess.run(
         [sys.executable, str(GUARD)],
-        input=json.dumps(payload),
+        input=payload,
         text=True,
         capture_output=True,
         check=False,
@@ -28,6 +29,10 @@ def run_guard(payload: dict) -> tuple[int, dict]:
     out = proc.stdout.strip()
     parsed = json.loads(out) if out else {}
     return proc.returncode, parsed
+
+
+def run_guard(payload: dict) -> tuple[int, dict]:
+    return run_guard_raw(json.dumps(payload))
 
 
 def run_fixture(name: str) -> tuple[int, dict]:
@@ -101,17 +106,11 @@ class SubagentStartContractTests(unittest.TestCase):
         self.assertEqual(out.get("permission"), "deny")
         self.assertIn("Cloud", out.get("user_message", ""))
 
-    def test_invalid_json_denied(self) -> None:
-        proc = subprocess.run(
-            [sys.executable, str(GUARD)],
-            input="not json",
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        self.assertEqual(proc.returncode, 2)
-        out = json.loads(proc.stdout)
-        self.assertEqual(out.get("permission"), "deny")
+    def test_invalid_json_allowed(self) -> None:
+        """Unparseable stdin is a guard failure, not a writer policy violation."""
+        code, out = run_guard_raw("not json")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.get("permission"), "allow")
 
     def test_non_writer_passes_through(self) -> None:
         code, out = run_guard({"subagent_type": "explorer", "task": "look around"})
@@ -174,15 +173,81 @@ class PreToolUseTaskTests(unittest.TestCase):
 
 
 class HooksManifestTests(unittest.TestCase):
-    def test_both_events_registered_fail_closed(self) -> None:
+    def test_both_events_registered_fail_open(self) -> None:
+        """A hook that cannot start must not block dispatch it never inspected."""
         hooks = json.loads(HOOKS_JSON.read_text())["hooks"]
         for event, matcher in (("subagentStart", "fixer|designer"), ("preToolUse", "Task")):
             entries = hooks.get(event) or []
             self.assertTrue(entries, msg=f"{event} hook missing")
             entry = entries[0]
             self.assertEqual(entry.get("matcher"), matcher)
-            self.assertTrue(entry.get("failClosed"))
+            self.assertFalse(entry.get("failClosed"))
             self.assertIn("task-contract-guard", entry.get("command", ""))
+
+    def test_command_checks_interpreter_and_path_before_running(self) -> None:
+        """A broken install must not reach python3, whose exit 2 reads as deny."""
+        hooks = json.loads(HOOKS_JSON.read_text())["hooks"]
+        for event in ("subagentStart", "preToolUse"):
+            command = hooks[event][0]["command"]
+            self.assertIn("command -v python3", command)
+            self.assertIn('[ -f "${CURSOR_PLUGIN_ROOT:-}/hooks/task-contract-guard.py" ]', command)
+            self.assertIn('printf \'{"permission":"allow"}', command)
+
+
+class BrokenInstallTests(unittest.TestCase):
+    """Guard-infrastructure failures must never masquerade as a policy deny.
+
+    Cursor reads exit 2 from a permission hook as an explicit denial, so an
+    unresolvable plugin root or unreadable payload would otherwise block every
+    Task dispatch rather than only non-conforming writer dispatches.
+    """
+
+    WRITER_DENY = {
+        "hook_event_name": "preToolUse",
+        "tool_name": "Task",
+        "tool_input": {"subagent_type": "fixer", "prompt": "no contract fields"},
+    }
+
+    def run_hook_command(self, plugin_root: str | None, payload: str) -> tuple[int, str]:
+        command = json.loads(HOOKS_JSON.read_text())["hooks"]["preToolUse"][0]["command"]
+        env = dict(os.environ)
+        if plugin_root is None:
+            env.pop("CURSOR_PLUGIN_ROOT", None)
+        else:
+            env["CURSOR_PLUGIN_ROOT"] = plugin_root
+        proc = subprocess.run(
+            ["/bin/sh", "-c", command],
+            input=payload,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        return proc.returncode, proc.stdout.strip()
+
+    def test_missing_plugin_root_allows(self) -> None:
+        code, out = self.run_hook_command(None, json.dumps(self.WRITER_DENY))
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out).get("permission"), "allow")
+
+    def test_wrong_plugin_root_allows(self) -> None:
+        code, out = self.run_hook_command("/nonexistent-plugin-root", json.dumps(self.WRITER_DENY))
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out).get("permission"), "allow")
+
+    def test_resolvable_plugin_root_still_denies(self) -> None:
+        code, out = self.run_hook_command(str(PLUGIN_DIR), json.dumps(self.WRITER_DENY))
+        self.assertEqual(code, 2)
+        self.assertEqual(json.loads(out).get("permission"), "deny")
+
+    def test_malformed_stdin_allows(self) -> None:
+        code, out = run_guard_raw("not json at all")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.get("permission"), "allow")
+
+    def test_non_object_payload_allows(self) -> None:
+        code, out = run_guard_raw("[1, 2, 3]")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.get("permission"), "allow")
 
 
 class PluginManifestTests(unittest.TestCase):

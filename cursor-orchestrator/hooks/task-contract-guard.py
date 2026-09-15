@@ -16,7 +16,17 @@ subagentStart (matcher: fixer|designer) — kept for surfaces that still emit it
 
 Exit 0 + {"permission":"allow"} on success.
 Exit 2 + {"permission":"deny",...} on contract violation.
-Other non-zero exits depend on failClosed in hooks.json (true for this hook).
+Exit 2 is reserved for a policy verdict, because Cursor reads it as an explicit
+deny on a permission hook. Anything this guard cannot evaluate — unreadable or
+non-JSON stdin, an unexpected payload shape — therefore allows instead, leaving
+enforcement to the always-on rule. A broken install must not look like a denial:
+`python3` also exits 2 when it cannot open this file, so hooks.json checks that
+the interpreter and this path resolve before handing over control.
+
+hooks.json runs this fail-open (`failClosed: false`) for the same reason. A hook
+that cannot start enforces nothing either way, and the `Task` matcher covers
+every lane, so failing closed would block read-only dispatch too. Denials and
+malformed responses still block while the guard runs.
 """
 
 from __future__ import annotations
@@ -197,11 +207,11 @@ def main() -> None:
     try:
         raw = sys.stdin.read()
         data = json.loads(raw) if raw.strip() else {}
-    except json.JSONDecodeError:
-        _deny("Invalid hook input: expected JSON on stdin.")
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        _allow()
 
     if not isinstance(data, dict):
-        _deny("Invalid hook input: expected a JSON object.")
+        _allow()
 
     if detect_event(data) == "preToolUse":
         error = validate_tool_call(data)

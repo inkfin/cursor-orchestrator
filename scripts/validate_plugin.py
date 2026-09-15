@@ -221,11 +221,23 @@ def main() -> int:
             errors.append(f"hooks.json missing {event} hook")
             continue
         entry = entries[0]
-        if not entry.get("failClosed"):
-            errors.append(f"{event} hook should set failClosed: true")
+        if entry.get("failClosed"):
+            errors.append(
+                f"{event} hook must set failClosed: false; a hook that cannot "
+                "start would otherwise block every dispatch it never inspected"
+            )
         cmd = entry.get("command", "")
         if "task-contract-guard" not in cmd:
             errors.append(f"{event} command must invoke task-contract-guard")
+        # python3 exits 2 on a missing script, which Cursor reads as an explicit
+        # deny, so the command must prove the install resolves before running it.
+        if "command -v python3" not in cmd or "-f " not in cmd:
+            errors.append(
+                f"{event} command must check python3 and the guard path before "
+                "invoking it"
+            )
+        if '{"permission":"allow"}' not in cmd:
+            errors.append(f"{event} command must fall back to an allow verdict")
 
     pre_tool_entries = hooks.get("preToolUse", [])
     if pre_tool_entries and pre_tool_entries[0].get("matcher") != "Task":

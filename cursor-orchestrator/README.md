@@ -89,7 +89,7 @@ Writers (`fixer`, `designer`) run foreground and need the four-field task contra
 
 ## Hooks
 
-`hooks/hooks.json` runs `task-contract-guard.py` on two events. Both set **`failClosed: true`** (needs `python3` on PATH).
+`hooks/hooks.json` runs `task-contract-guard.py` on two events (needs `python3` on PATH).
 
 | Event | Matcher | What it gates |
 |---|---|---|
@@ -97,6 +97,14 @@ Writers (`fixer`, `designer`) run foreground and need the four-field task contra
 | `subagentStart` | `fixer\|designer` | Same writer contract on surfaces that still emit it |
 
 Non-writer lanes skip the writer contract and only hit the cloud checks. The hook does not store state or merge branches.
+
+Both entries set **`failClosed: false`**, and the command checks that `python3`
+and the guard path resolve before running the guard, falling back to an `allow`
+verdict when they do not. Cursor reads exit 2 from a permission hook as an
+explicit deny, and `python3` also exits 2 when it cannot open the script — so a
+mislocated plugin root would otherwise deny **every** `Task` dispatch, read-only
+lanes included. Enforcement is unchanged whenever the guard actually runs:
+denials and malformed responses still block.
 
 ## Models
 
