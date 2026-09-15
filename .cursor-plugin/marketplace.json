@@ -4,13 +4,13 @@
     "name": "inkfin"
   },
   "metadata": {
-    "description": "Cursor-native policy pack: specialist lanes, single-writer orchestration, verification, and task-contract hooks."
+    "description": "Thin always-on research/验收 gates, opt-in /orc plan execution, writer task-contract hooks."
   },
   "plugins": [
     {
       "name": "cursor-orchestrator",
       "source": "cursor-orchestrator",
-      "description": "Cursor-native policy pack: specialist lanes, single-writer orchestration, verification, and task-contract hooks."
+      "description": "Thin always-on research/验收 gates, opt-in /orc plan execution, writer task-contract hooks."
     }
   ]
 }

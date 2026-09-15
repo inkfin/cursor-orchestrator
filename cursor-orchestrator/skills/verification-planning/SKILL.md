@@ -1,20 +1,21 @@
 ---
 name: verification-planning
 description: >-
-  Plan verification before non-trivial implementation — claims, evidence paths,
-  validation owner, and budget. Apply automatically before scoped changes that
-  touch behavior, APIs, data models, or multi-file refactors.
+  Plan evidence and a bounded parallel acceptance wave before a non-trivial
+  writer under /orc, or before 验收. Skip for parent-owned trivial work.
 ---
 
 # Verification planning
 
-Use this skill **before** dispatching a writer on any non-trivial change.
+Use this skill **before** a dispatched writer on a non-trivial change, and before an 验收 gate.
 
-Trivial = single-file typo, comment-only edit, or rename with no behavior change.
+The parent may skip this planning skill for Q&A, known-path edits, ≤3 files, and reproduced small fixes it implements itself (no `/orc`). This does not waive the always-on acceptance wave when the user asks for 验收 or a non-trivial behavior change is being declared done.
+
+Trivial = single-file typo, comment-only edit, rename with no behavior change, or a reproduced small fix the parent is doing.
 
 ## Exemptions
 
-Throwaway prototypes, read-only investigations, and pure environment diagnosis may skip the full plan and independent verifier. Record one sentence explaining which exemption applies. Promotion to product code ends the exemption.
+Throwaway prototypes, read-only investigations, and pure environment diagnosis may skip the full plan and acceptance wave. Record one sentence explaining which exemption applies. Promotion to product code ends the exemption.
 
 ## Produce a verification plan
 
@@ -38,10 +39,12 @@ Prefer automated evidence. If only manual proof is possible, name the steps.
 
 | Role | Owner |
 |---|---|
-| Implementation | `fixer` or `designer` (runs verification during work) |
-| Independent acceptance | `verifier` (after parent reconciliation) |
+| Implementation | parent, or `fixer` / `designer` when a writer is dispatched |
+| Requirements / diff / evidence | one `verifier` |
+| Focused risk review | 1–3 `explorer` / `oracle` reviewers with orthogonal claims |
+| Reconciliation | parent, once all reports use the same immutable diff/commit |
 
-The writer runs **Verification** commands from the task contract. `verifier` re-checks requirements, diff, and evidence independently.
+Two reviewers total is the default; four is the maximum. Do not clone prompts. Partition ownership, compatibility, runtime behavior, architecture, or security claims. The writer (or parent) runs **Verification** commands; reviewers inspect the resulting evidence independently.
 
 ### 4. Acceptance strength
 
@@ -61,8 +64,9 @@ Set limits to prevent endless loops:
 
 - Max writer repair rounds before escalation: **2**
 - Max verifier → repair → re-verify cycles: **1**
-- When budget is exhausted: stop, report status, escalate to `oracle` if judgment is needed
+- Max acceptance reviewers per wave: **4**
+- When budget is exhausted: stop and report status; use `oracle` only when unresolved judgment blocks acceptance
 
 ## Handoff
 
-Include the verification plan in the writer task under **Verification**. Do not start implementation until claims and evidence paths are explicit.
+Include the verification plan in the writer task under **Verification**. Before acceptance, freeze the diff/commit and evidence locations, then launch the reviewers in one parallel wave.

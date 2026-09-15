@@ -188,7 +188,7 @@ class HooksManifestTests(unittest.TestCase):
 class PluginManifestTests(unittest.TestCase):
     def test_plugin_json_declares_component_paths(self) -> None:
         plugin = json.loads((PLUGIN_DIR / ".cursor-plugin" / "plugin.json").read_text())
-        self.assertEqual(plugin.get("version"), "0.3.2")
+        self.assertEqual(plugin.get("version"), "0.4.0")
         self.assertEqual(plugin.get("agents"), "./agents/")
         self.assertEqual(plugin.get("skills"), "./skills/")
         self.assertEqual(plugin.get("rules"), "./rules/")
@@ -227,7 +227,7 @@ class PstackLiteSkillTests(unittest.TestCase):
     def test_prototype_cannot_modify_product_code(self) -> None:
         text = self.skill_text("prototype-lite")
         self.assertIn("product paths remain read-only", text)
-        self.assertIn("hand product-code work to `fixer` or `designer`", text)
+        self.assertIn("implement as product code (parent by default, or a writer if `orc` is active)", text)
 
     def test_collab_debug_forbids_guessing_before_reproduction(self) -> None:
         text = self.skill_text("collab-debug")
@@ -257,16 +257,20 @@ class PstackLiteSkillTests(unittest.TestCase):
         self.assertIn("wake reason, metric freshness, evaluation window, and attempt id", text)
         self.assertIn("continue/re-arm without retune", text)
 
-    def test_recon_before_plan_is_formal_only(self) -> None:
+    def test_parent_works_by_default(self) -> None:
         text = (PLUGIN_DIR / "rules" / "orchestration.mdc").read_text()
-        self.assertIn(
-            "For **formal non-trivial implementation** only, dispatch `explorer` before planning",
-            text,
-        )
-        self.assertIn(
-            "read-only investigation, scratch prototype, and collab diagnosis skip full recon",
-            text,
-        )
+        self.assertIn("The parent answers and implements by default", text)
+        self.assertIn("Multi-agent plan execution is opt-in", text)
+        self.assertIn("## Research", text)
+        self.assertIn("## Acceptance", text)
+        self.assertIn("parallel acceptance wave", text)
+        self.assertIn("2–4 reviewers total", text)
+        self.assertIn("## Experiments and runtime", text)
+        self.assertIn("Raw logs and large evidence stay in files", text)
+        self.assertIn("Do not launch a recon lane and parent Read/Grep", text)
+        self.assertIn("operation + resource id + expected prior generation/attempt", text)
+        self.assertNotIn("Dispatch by default", text)
+        self.assertIn("Do not report lane counts", text)
 
 
 class OrcSkillTests(unittest.TestCase):
@@ -284,10 +288,14 @@ class OrcSkillTests(unittest.TestCase):
         self.assertNotIn("alwaysApply", text)
         self.assertNotIn("orc-orchestrate", text)
 
-    def test_dispatch_by_default_override(self) -> None:
+    def test_opt_in_plan_execution(self) -> None:
         text = self.skill_text()
-        self.assertIn("do the work yourself", text)
-        self.assertIn("Dispatch by default", text)
+        self.assertIn("multi-agent plan execution", text)
+        self.assertIn("specialists execute the plan", text)
+        self.assertIn("Dispatch to complete the plan", text)
+        self.assertIn("One acceptance wave", text)
+        self.assertIn("Artifact-first", text)
+        self.assertNotIn("Dispatch by default", text)
 
     def test_mentions_scout_for_patrol(self) -> None:
         text = self.skill_text()
@@ -318,6 +326,9 @@ class OrcPatrolSkillTests(unittest.TestCase):
         self.assertIn("disable-model-invocation: true", text)
         self.assertIn("scout", text)
         self.assertIn("巡查", text)
+        self.assertIn("reuse an existing snapshot", text)
+        self.assertIn("do not pad the prompt with the writer four-field contract", text)
+        self.assertIn("resume the same scout once", text)
 
 
 class ScoutAgentTests(unittest.TestCase):
@@ -333,6 +344,26 @@ class ScoutAgentTests(unittest.TestCase):
         self.assertIn(".cursor/scout-logs", text)
         self.assertIn("run an experiment", text)
         self.assertIn("use `operator`", text)
+        self.assertIn("all named related", text)
+        self.assertIn("Repeat an unchanged snapshot", text)
+
+
+class ContextBudgetAgentTests(unittest.TestCase):
+    def test_operator_batches_transaction_and_stores_receipts(self) -> None:
+        text = (PLUGIN_DIR / "agents" / "operator.md").read_text()
+        self.assertIn("is_background: false", text)
+        self.assertIn("one transaction", text)
+        self.assertIn("preflight → dry-run → create → initial inspect", text)
+        self.assertIn("idempotency key", text)
+        self.assertIn("operation + resource id + expected prior generation/attempt", text)
+        self.assertIn("evidence paths", text)
+        self.assertIn("Do not paste large command output", text)
+
+    def test_oracle_can_conclude_experiment_from_artifacts(self) -> None:
+        text = (PLUGIN_DIR / "agents" / "oracle.md").read_text()
+        self.assertIn("Experiment conclusion", text)
+        self.assertIn("scout artifact paths", text)
+        self.assertIn("Separate platform health from hypothesis evidence", text)
 
 
 class ValidatePluginScriptTests(unittest.TestCase):

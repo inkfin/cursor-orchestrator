@@ -23,6 +23,8 @@ Create `.cursor/goal-watch/<run>.md`. One goal controls exactly one job and reco
 
 Every start/stop/read command needs a timeout and meaningful exit code. `operator` may execute only those declared commands; it never invents `kill` or decides whether to stop.
 
+Declare an evidence directory. `operator` stores launch/control receipts there; `scout` stores each meaningful observation snapshot there. Raw platform JSON and logs do not go into the parent prompt.
+
 ## Sparse wakeups
 
 Use `/loop` as a one-shot `sleep` + sentinel, or one event watcher for a result file/log line. A long heartbeat may recover a dead watcher, at roughly the goal's check interval. Never run an agent polling loop such as `while sleep 30; read metric`, and never use a Ralph `stop` hook to feed the same prompt back each turn.
@@ -36,15 +38,18 @@ A non-terminal wake does **not** retune. Classify the wake by wake reason, metri
 On each wake:
 
 1. Read the goal file and declared job handle; do not rely on chat memory.
-2. Ask `operator` for one declared liveness/metric read. Record whether the metric is fresh (new since last processed evaluation of this attempt).
-3. Branch:
+2. If the wake is a known watcher/heartbeat recovery with no state change, re-arm without dispatching a subagent. Otherwise ask one `scout` to snapshot the job and fresh metric into the evidence directory. One snapshot covers all related runs named by the goal.
+3. Reuse the previous snapshot when resource state/version, metric window, and criteria are unchanged. Record whether the metric is fresh (new since last processed evaluation of this attempt).
+4. Branch:
 
    - **Watcher or heartbeat recovery, old job healthy:** rebuild the watcher and update next wake only. Do not stop, start, or retune.
    - **Not yet in the evaluation window, or no fresh metric:** leave the old job running and re-arm only. Do not stop, start, or retune.
-   - **Fresh metric after minimum progress/noise rule, predicate miss:** then — and only then — change one allowed knob, gracefully stop the old job, start a new attempt, append one decision-log entry, atomically update state, and arm the next wake.
+   - **Fresh metric after minimum progress/noise rule, predicate miss:** ask one `oracle` to judge the hypothesis and gates from the run ledger plus scout artifact paths; then — and only then — change one allowed knob. Ask one `operator` to perform the complete stop → replacement-start → initial-inspect transaction. Append one decision-log entry, atomically update state, and arm the next wake.
    - **Job died unexpectedly:** follow only the recovery action predeclared in the goal. If that action cannot restore the job, enter hard stop/`blocked`. Do not invent a restart or retune.
    - **Predicate met, or a hard stop (wall clock/retunes exhausted, unrecoverable dead job, human `stop`):** apply the goal's declared action and report.
 
 Never duplicate kill, start, or retune for the same attempt id. Duplicate wakes with a stale metric or the same evaluation window must continue/re-arm without retune.
+
+One wake uses at most one observation lane, one conclusion lane when a decision is due, and one control lane when mutation is authorized. Do not dispatch one task per CLI command, and do not reread raw logs in the parent after a compact specialist report.
 
 Write goal state and the decision log atomically after every transition. A failed graceful stop may use only a predeclared escalation action; if none exists, report `blocked` and do not guess `kill -9`. Training-code changes still require the formal `fixer` path.

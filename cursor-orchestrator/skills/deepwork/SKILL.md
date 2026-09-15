@@ -1,13 +1,14 @@
 ---
 name: deepwork
 description: >-
-  Orchestrate large refactors and multi-package implementation — phase gates,
-  writer ownership, local worktree allocation, sequential integration, and
-  bounded repair. Use for changes spanning many files, modules, or coordinated
-  workstreams. Cloud execution is forbidden.
+  Under /orc or when the user names deepwork: large refactors, writer
+  ownership, local worktree allocation, sequential integration, bounded
+  repair. Cloud execution is forbidden. Do not use for ordinary parent-owned edits.
 ---
 
 # Deep work
+
+Use when the user invoked `orc` / 编排, named this skill, or asked for coordinated multi-package work. Do not auto-dispatch writers from the always-on rule.
 
 Use for **large** implementation: multi-module refactors, new subsystems, coordinated API + client changes, or any work that might tempt unsafe parallel writes.
 
@@ -19,12 +20,12 @@ Do not use deepwork for small demos, throwaway research spikes, typo/comment edi
 
 Work proceeds in order; do not skip gates.
 
-1. **Recon** — `explorer` maps touch points, shared files, and risks.
+1. **Recon** — parent maps touch points when they are known; dispatch **one** `explorer` if landing is unknown or many directories must be scanned.
 2. **Plan** — parent defines packages, owned paths, integration order, verification per package.
 3. **Allocate** — decide single-writer vs local worktree parallel (see below).
-4. **Execute** — dispatch writer(s) with full task contracts.
+4. **Execute** — dispatch writer(s) with full task contracts (this skill is the cross-package / isolation case).
 5. **Integrate** — parent applies worktree results **one package at a time** in declared order.
-6. **Verify** — `verifier` after each integration step (or once at end if packages are truly independent and evidence is per-package).
+6. **Verify** — run targeted evidence after each integration step, then one final parallel acceptance wave against the integrated immutable commit.
 
 ## Single writer (default)
 
@@ -64,10 +65,10 @@ Parent responsibilities:
 |---|---|
 | Per-writer self-repair | 2 |
 | Post-integration fix | 1 |
-| Verifier fail → repair → re-verify | 1 |
+| Acceptance fail → repair → one new wave | 1 |
 
-Exhausted budget → stop, report, escalate to `oracle` / `oracle-sol` if needed.
+Exhausted budget → stop, report, escalate to `oracle` if judgment is needed. Add `oracle-sol` only if the user asks or the two may conflict.
 
 ## Status reporting
 
-Use orchestration vocabulary: *plan ready* → *dispatched (N lanes)* → *reconciled* → *verified*.
+Report progress in one ordinary sentence. Do not report `dispatched (N lanes)`.

@@ -4,7 +4,7 @@ A Cursor plugin marketplace containing one plugin.
 
 | Plugin | Path | What it does |
 |---|---|---|
-| `cursor-orchestrator` | [`cursor-orchestrator/`](./cursor-orchestrator) | Specialist-lane orchestration policy (v0.3.2): 9 subagents, 9 workflow skills (including explicit `orc` and `orc-patrol`), and a writer task-contract hook |
+| `cursor-orchestrator` | [`cursor-orchestrator/`](./cursor-orchestrator) | Specialist-lane orchestration policy (v0.4.0): 9 subagents, 9 workflow skills (opt-in `/orc`), thin research/parallel-验收/experiment rule, writer task-contract hook |
 
 Install and lane lookup: [plugin README](./cursor-orchestrator/README.md). Routing: `cursor-orchestrator/rules/orchestration.mdc`.
 

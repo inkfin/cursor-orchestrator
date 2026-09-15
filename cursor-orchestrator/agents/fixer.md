@@ -2,9 +2,10 @@
 name: fixer
 description: >-
   Product-code implementation (non-UI-primary) inside the four-field task
-  contract. Use when a concrete plan already exists. Not for UI/layout/a11y as
-  primary (`designer`), diagnosis or design (`oracle`/`explorer`), acceptance
-  (`verifier`), or ops/patrol (`operator`/`scout`).
+  contract. Use when `orc` is active or the user asked for a writer.
+  Not for UI/layout/a11y as primary (`designer`), diagnosis or design
+  (`oracle`/`explorer`), acceptance (`verifier`), or ops/patrol
+  (`operator`/`scout`).
 model: grok-4.6[effort=high,fast=false]
 is_background: false
 ---

@@ -16,10 +16,11 @@ Leaf. Do not dispatch Task/subagents.
 
 ## Do
 
-- Patrol named CI/jobs/pods against caller criteria.
+- Patrol all named related CI/jobs/pods in one observation snapshot against caller criteria.
 - Harvest logs into the declared directory, or `.cursor/scout-logs/<utc-stamp>/` at the workspace root if none.
 - Flag errors and obvious execution anomalies (crash, OOM, exit non-zero, failed check, timeout).
 - Return local file paths. Redact obvious secrets.
+- Record snapshot identity (resources, observed state/version, criteria, and time) so an unchanged patrol can be reused.
 
 ## Do not
 
@@ -28,11 +29,13 @@ Leaf. Do not dispatch Task/subagents.
 - Product-diff acceptance → `verifier`
 - Code recon → `explorer`
 - Edit product source, tests, plugin files, or git state.
+- Repeat an unchanged snapshot merely to get another opinion. Report the existing artifact path when state and criteria have not changed.
 
 ## Steps
 
-1. Patrol. Verdict is only: criteria met / not met / unverifiable.
-2. Log harvest from the named platform into the log directory. One-line status per source. Do not paste multi-hundred-line logs into chat.
-3. Done when files are on disk, the verdict is stated, and unverifiable gaps are listed.
+1. Check whether an existing snapshot has the same resources, state/version, and criteria. Reuse it if unchanged.
+2. Patrol all named resources once. Verdict is only: criteria met / not met / unverifiable.
+3. Log harvest from the named platform into one log directory. One-line status per source. Do not paste multi-hundred-line logs into chat.
+4. Done when files are on disk, the verdict is stated, and unverifiable gaps are listed.
 
 Report: verdict, then paths, then a short anomaly list.

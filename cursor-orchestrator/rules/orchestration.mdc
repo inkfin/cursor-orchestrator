@@ -1,90 +1,52 @@
 ---
-description: Cursor-native orchestration. Parent plans and dispatches; one writer at a time; independent verification.
+description: Thin always-on gates for research, parallel acceptance, and artifact-first experiment operations. /orc opts into plan execution.
 alwaysApply: true
 ---
 
 # Agent orchestration
 
-Parent judges, plans, dispatches, reconciles, and accepts. It does not implement on paths owned by an active writer.
+The parent answers and implements by default. Multi-agent plan execution is opt-in: use `orc` only when the user invokes `/orc`, `orc`, 编排, or 主动安排任务, or explicitly asks specialists to execute a plan.
 
-## Route by task shape
+Always keep these safety rules when any lane is used: leaf agents never delegate; reproduce before a product fix; writer tasks use the four-field contract; one writer at a time unless isolated local worktrees are justified; cloud writers are forbidden.
 
-Use the lightest path that fits:
+## Research
 
-1. **Read-only investigation.** `explorer` / `librarian`. No writer or verifier.
-2. **Scratch prototype.** Follow `prototype-lite`. The parent may write only to explicitly declared scratch or temporary paths. Product code is off-limits. The prototype may be discarded or redirected.
-3. **Collaborative debugging.** Follow `collab-debug`. Separate reproduction evidence, collaborator reports, and environment differences. Do not dispatch a writer to guess a fix before reproduction identifies a code cause.
-4. **Formal implementation.** `fixer` / `designer`, the task contract, verification planning, and independent verification. Use `deepwork` only for genuinely large or coordinated work.
+Do not guess paths, APIs, platform state, or external facts.
 
-If a prototype is promoted to product code, stop the scratch path and rewrite **Scope**, **Owned paths**, and **Verification** before dispatching the appropriate writer. Scratch permission never authorizes the parent to edit product code.
+- Known path or a bounded lookup: parent tools.
+- Broad or uncertain question with one search space: one `explorer` (local) or `librarian` (external).
+- Independent hypotheses or genuinely separate sources: 2–3 read-only lanes in one parallel wave. Give them non-overlapping questions, not file-cluster slices.
+- Do not launch a recon lane and parent Read/Grep the same scope in the same assistant turn. Once a lane owns a question, the parent must not repeat its searches while it runs. Reuse its report or resume that lane for a follow-up.
+- Each report is verdict-first and compact. Raw logs and large evidence stay in files; return paths plus the few facts needed to decide.
 
-## Dispatch by default
+## Acceptance
 
-| Work | Lane |
-|---|---|
-| Local codebase recon, call paths, how-X-works | `explorer` |
-| External docs, APIs, changelogs, web facts | `librarian` |
-| Named CLI: start, stop, submit, poll/watch experiments, PRs, deploys | `operator` |
-| Patrol / 巡查 vs criteria; log harvest to local files | `scout` |
-| Architecture, hard debug, consequential review | `oracle` |
-| Hard-to-reverse second verdict (with `oracle`) | `oracle-sol` |
-| Product-code implementation (non-UI-primary) | `fixer` |
-| UI / layout / visual / a11y | `designer` |
-| Post-implementation acceptance | `verifier` |
+Explicit 验收 and completion of a non-trivial behavior change require one **parallel acceptance wave**:
 
-Dispatch by name. Leaf agents never delegate. No further Task/subagent dispatch from any lane.
+1. Dispatch one `verifier` for requirements vs final diff vs executed evidence.
+2. In parallel, dispatch 1–3 focused read-only reviewers for orthogonal risks (for example ownership boundaries, compatibility, runtime behavior, security, or architecture). This count includes all reviewers after the verifier, for 2–4 reviewers total. Use `explorer` for traceable code facts and `oracle` only for judgment.
+3. Give every reviewer the same immutable diff/commit and evidence locations, but a distinct claim set. Do not send cloned prompts.
+4. The parent reconciles the compact reports once. A fail blocks acceptance; disagreement is stated, not averaged away. Repair gets at most one new acceptance wave.
 
-`operator` is named CLI control (including poll/watch). `scout` is patrol/巡查 and log harvest. Do not swap them.
+Two reviewers are the default; four is the maximum. Comment-only, typo, and rename-with-no-behavior changes need only parent evidence unless the user explicitly asks for 验收. `oracle-sol` is not automatic; use it only when the user asks for a second verdict or two consequential judgments may conflict.
 
-## Single-writer model
+## Experiments and runtime
 
-Default: **one writer at a time**.
+Keep platform payloads and logs out of the parent context:
 
-| Work type | Writer |
-|---|---|
-| UI / interaction | `designer` |
-| Everything else (code, config, tests, scripts) | `fixer` |
+- `operator` owns a named foreground control transaction: start/stop/retry, or preflight → dry-run → create → initial inspect. Its idempotency key is derived from operation + resource id + expected prior generation/attempt, not a fresh random id. Identical consecutive user requests reuse that key and existing receipts. Batch the transaction into one task instead of one task per CLI command. Point it to the repository's operation skill/run card rather than pasting known CLI help into the prompt. It writes raw command receipts only to declared evidence paths and returns status, IDs/URLs, artifact paths, and blockers.
+- `scout` owns one observation snapshot across all named related runs. It writes inspect output and logs under one declared log directory and returns criteria verdicts plus anomaly lines. While it runs, the parent does not issue overlapping platform inspect/log commands. If a selector or command makes the snapshot unverifiable, resume the same scout once with the corrected detail; do not open a new scout task.
+- When the user asks for the experiment conclusion, dispatch one read-only `oracle` with the hypothesis, gates, run ledger, and scout artifact paths. It reads artifacts directly and returns the decision; the parent does not paste raw logs into its prompt.
+- Long-running jobs use `goal-watch`: event/sparse wakeups only. A wake may create one snapshot, not a polling chain of subagents.
 
-Writers run **foreground** (`is_background: false`). While a writer is active, the parent agent **must not edit that writer's owned paths**.
+The parent may update one canonical run record selected by the repository from compact receipts. Update derived indexes, handoffs, and summaries only at a terminal state or explicit handoff; do not fan every transient status into several ledgers or reread raw artifacts merely to restate a specialist result.
 
-Every writer task **must** include all four contract fields (enforced by hook):
+## If a writer is dispatched
 
-- **Owned paths:** exclusive file/directory globs this writer may touch
-- **Scope:** what to change and what to leave alone
-- **Verification:** exact commands or evidence to produce
-- **Execution mode:** `single` (default) or `parallel/worktree` (see below)
+UI → `designer`; otherwise `fixer`. Writers run foreground. The parent does not edit active **Owned paths**.
 
-Hand `fixer` and `designer` bounded instructions only. Open-ended work does not go to a cheap lane.
+Every writer task includes **Owned paths**, **Scope**, **Verification**, and **Execution mode** (`single` or `parallel/worktree`). Parallel writers need a real non-empty `git_branch` each, non-overlapping paths, and sequential integration. Cloud subagents are forbidden.
 
-## Parallel execution (local worktree only)
+## Status
 
-Use Cursor **native local worktree** isolation only when **all** are true:
-
-1. At least **two independent work packages** with no ordering dependency during implementation
-2. **Non-overlapping owned paths** per writer
-3. **No shared** schema, lock, or generated files across packages
-
-When parallel:
-
-- Set **Execution mode** to `parallel/worktree` (or equivalent) in each writer task
-- Provide a real non-empty **`git_branch`** per writer. Task text describing a local worktree is not accepted
-- Parent defines owned paths, integration order, and merge sequence
-- Apply results **sequentially**, then verify after each integration step
-
-**Cloud subagents are forbidden.** Do not dispatch `environment: cloud` or cloud worktrees for implementation writers. A `preToolUse` hook on the `Task` tool denies cloud execution and incomplete writer contracts (Owned paths, Scope, Verification, Execution mode). A `git_branch` containing `cloud` is denied as well. `subagentStart` repeats the same writer checks when that event fires.
-
-For large refactors, follow the `deepwork` skill (phase gates, worktree allocation, repair budget).
-
-## Dispatch discipline
-
-1. **Recon before plan.** For **formal non-trivial implementation** only, dispatch `explorer` before planning. Do not plan that path from guesses. This does not override lighter routes: read-only investigation, scratch prototype, and collab diagnosis skip full recon.
-2. **Read-only lanes in background.** `explorer`, `librarian`, `oracle`, `oracle-sol`, `operator`, and `scout` may run in background. Writers and `verifier` run foreground.
-3. **Reconcile before proceed.** When specialist reports return, reconcile them against the plan. Conflicts get resolved (re-dispatch or judge), never averaged away.
-4. **Dual-oracle rule.** For hard-to-reverse decisions, dispatch `oracle` and `oracle-sol` together, then synthesize. If they disagree, surface the disagreement explicitly.
-5. **Plan → execute split.** Parent writes the concrete plan; writers execute bounded slices.
-6. **Independent verification.** After writers finish and the parent reconciles, dispatch **`verifier`** (not the writer) to check requirements, final diff, test/build evidence, and edge cases. Escalate hard findings to `oracle`.
-7. **Non-trivial changes.** Before implementation, apply the `verification-planning` skill (claims, evidence paths, validation owner, budget).
-
-## Status vocabulary
-
-Report progress as: *recon in flight*, *plan ready*, *dispatched (N lanes)*, *reconciled*, *verified*.
+Use one ordinary sentence. Do not report lane counts or paste specialist transcripts.

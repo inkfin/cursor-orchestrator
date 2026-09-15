@@ -1,15 +1,15 @@
 # cursor-orchestrator
 
-Cursor-native **policy pack** for specialist-lane orchestration (hub-and-spoke without a separate runtime). Version **0.3.2**.
+Cursor-native **policy pack** for specialist-lane orchestration (hub-and-spoke without a separate runtime). Version **0.4.0**.
 
 It ships:
 
 - **9 custom subagents** under `agents/`
 - **9 workflow skills** under `skills/`
 - A writer **task-contract hook** under `hooks/`
-- One always-on routing rule under `rules/`
+- One thin always-on rule under `rules/` (research, parallel 验收, and artifact-first experiments)
 
-Routing lives in `rules/orchestration.mdc`. Explicit dispatch is skill `orc`. Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled.
+The parent implements by default. The always-on rule does not dispatch writers to execute a plan; that protocol is the explicit `orc` skill (`/orc`). Research may fan out only across independent questions. Non-trivial acceptance uses one bounded parallel review wave. Experiment control/logs/conclusions flow through `operator` → evidence files, `scout` → log files, and `oracle` → compact decision. Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled.
 
 Herdr fleet management, peer mailbox files, and session hooks stay outside this plugin.
 
@@ -59,15 +59,15 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 
 | Agent | Job |
 |---|---|
-| `explorer` | Local codebase recon (read-only) |
-| `librarian` | External docs, APIs, web facts (read-only) |
-| `operator` | Named CLI: start, stop, submit, poll/watch |
-| `scout` | Patrol / 巡查 and log harvest |
-| `oracle` | Last-resort architecture / hard debug / review |
-| `oracle-sol` | Second verdict with `oracle` |
+| `explorer` | Local recon when landing is unknown (read-only, foreground) |
+| `librarian` | External docs, APIs, web facts (read-only, foreground) |
+| `operator` | One named CLI transaction; raw receipts to evidence files |
+| `scout` | One multi-resource patrol snapshot and log harvest |
+| `oracle` | Architecture / hard debug / experiment conclusion |
+| `oracle-sol` | Second verdict when asked or conflict is likely |
 | `fixer` | Product-code writer (non-UI-primary) |
 | `designer` | UI / layout / a11y writer |
-| `verifier` | Post-implementation acceptance (read-only) |
+| `verifier` | Independent 验收: requirements vs diff vs evidence |
 
 Writers (`fixer`, `designer`) run foreground and need the four-field task contract. Parallel writers need a real `git_branch`. Cloud subagents are forbidden. See `rules/orchestration.mdc`.
 
@@ -75,10 +75,10 @@ Writers (`fixer`, `designer`) run foreground and need the four-field task contra
 
 | Skill | When |
 |---|---|
-| `verification-planning` | Auto, before non-trivial changes |
-| `deepwork` | Large refactors; local worktree allocation |
+| `verification-planning` | Evidence plan and bounded parallel 验收 |
+| `deepwork` | Large refactors under `/orc`; local worktree allocation |
 | `reflect` | Explicit only, process retrospective |
-| `orc` | Explicit only; 主动安排任务; user names `orc` / 编排 |
+| `orc` | Explicit only (`/orc`); parent plans, specialists execute |
 | `orc-patrol` | Explicit only, 巡查 |
 | `visual-analysis` | GUI canvas for standalone analytical reports (IDE only) |
 | `prototype-lite` | Throwaway local prototypes in declared scratch paths |

@@ -88,8 +88,8 @@ def main() -> int:
             errors.append(f"Invalid JSON {path}: {exc}")
 
     plugin = check_json(PLUGIN_JSON)
-    if plugin.get("version") != "0.3.2":
-        errors.append(f"plugin.json version expected 0.3.2, got {plugin.get('version')}")
+    if plugin.get("version") != "0.4.0":
+        errors.append(f"plugin.json version expected 0.4.0, got {plugin.get('version')}")
     if not plugin.get("hooks"):
         errors.append("plugin.json missing hooks path")
     if not plugin.get("skills"):
@@ -146,11 +146,11 @@ def main() -> int:
     if extra_agents:
         errors.append(f"Unexpected agents: {sorted(extra_agents)}")
 
-    # Writers foreground
-    for writer in ("fixer", "designer"):
-        meta = parse_frontmatter(AGENTS_DIR / f"{writer}.md")
+    # Writers, mutating control, and default-sync read-only lanes stay foreground
+    for name in ("fixer", "designer", "operator", "explorer", "librarian", "oracle", "oracle-sol"):
+        meta = parse_frontmatter(AGENTS_DIR / f"{name}.md")
         if meta.get("is_background") != "false":
-            errors.append(f"{writer}: is_background must be false")
+            errors.append(f"{name}: is_background must be false")
 
     # Verifier
     verifier_meta = parse_frontmatter(AGENTS_DIR / "verifier.md")

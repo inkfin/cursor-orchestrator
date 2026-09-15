@@ -13,17 +13,17 @@ disable-model-invocation: true
 
 Future workflow commands may use the `orc-` prefix. This skill is just `orc-patrol`.
 
-Do not do the patrol yourself if `scout` can run. Dispatch `scout` via `Task` with all four contract fields:
+Do not do the patrol yourself if `scout` can run. Dispatch one `scout` for all related named resources. This is not a writer task; do not pad the prompt with the writer four-field contract. Supply:
 
-- **Owned paths:** only the log directory (`.cursor/scout-logs/` or the caller path)
-- **Scope:** patrol + log harvest; no product edits; no experiment start/stop
-- **Verification:** local log files exist; verdict vs criteria
-- **Execution mode:** `single`
+- one log directory (`.cursor/scout-logs/` or the caller path);
+- named resources and stable identifiers;
+- acceptance criteria;
+- allowed read-only platform commands and known CLI pitfalls.
 
 Pass through: acceptance criteria, named resources (run id, pod, URL), and log destination.
 
 If the user gave no criteria, default: job/pipeline succeeded; no errors; no obvious crash/OOM/timeout.
 
-After scout returns: show the verdict and log paths. Do not re-analyze the logs. Escalate to `oracle` only if the user asks why.
+Before dispatch, reuse an existing snapshot when resource state/version and criteria are unchanged. If a snapshot is unverifiable only because a selector or command was wrong, resume the same scout once with the correction; do not create another scout task. While scout runs, the parent does not issue overlapping inspect/log commands. After scout returns: show the compact verdict and log paths. Do not re-analyze or paste the logs. Escalate to `oracle` only if the user asks why or asks for an experiment conclusion.
 
-Scout is not a writer. Writers are `fixer` and `designer`. Include the four contract fields so dispatch stays bounded. Scout may run in background; the parent still uses `Task`.
+Scout is not a writer. It never starts, stops, retries, or creates experiments. Those are one complete named `operator` transaction.

@@ -2,8 +2,8 @@
 name: designer
 description: >-
   UI, layout, visual, and a11y implementation inside the four-field task
-  contract. Extends the existing design system. Use when the change is
-  UI-primary. Not for backend, tests, or scripts as primary (`fixer`), diagnosis
+  contract. Extends the existing design system. Use when `orc` is active or the
+  user asked for a UI writer. Not for backend, tests, or scripts as primary (`fixer`), diagnosis
   or design (`oracle`/`explorer`), acceptance (`verifier`), or ops/patrol
   (`operator`/`scout`).
 model: grok-4.6[effort=high,fast=false]

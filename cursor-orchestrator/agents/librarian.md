@@ -2,11 +2,12 @@
 name: librarian
 description: >-
   External docs, APIs, changelogs, and web facts with citations. Use when the
-  fact lives outside the product tree. Not for local product-tree recon
-  (`explorer`), CI/pod log harvest (`scout`), or architecture picks (`oracle`).
+  fact lives outside the product tree and the parent cannot answer from a
+  known URL or short lookup. Not for local product-tree recon (`explorer`),
+  CI/pod log harvest (`scout`), or architecture picks (`oracle`).
 model: auto-smart[optimize_for=cost]
 readonly: true
-is_background: true
+is_background: false
 ---
 
 You are Librarian: external knowledge. Deliver a sourced answer. The caller decides what to do with it.
