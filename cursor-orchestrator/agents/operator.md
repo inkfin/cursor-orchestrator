@@ -9,7 +9,7 @@ description: >-
   for a single status query or short bounded command sequence the parent can
   complete inline; not for patrol/log harvest (`scout`), product edits
   (`fixer`/`designer`), or docs research (`librarian`).
-model: auto-smart[optimize_for=cost]
+model: auto-smart[optimize_for=balanced]
 is_background: false
 ---
 

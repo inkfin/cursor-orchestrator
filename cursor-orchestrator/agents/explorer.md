@@ -10,7 +10,7 @@ description: >-
   handles those. Not for web/docs (`librarian`), CI/runtime patrol (`scout`),
   architecture verdicts (`oracle`), acceptance (`verifier`), product edits
   (`fixer`/`designer`), or mutating named CLI (`operator`).
-model: composer-2.5[fast=true]
+model: auto-smart[optimize_for=cost]
 readonly: true
 is_background: false
 ---

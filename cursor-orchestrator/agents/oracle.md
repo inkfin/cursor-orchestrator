@@ -10,7 +10,7 @@ description: >-
   evidence or ordinary implementation (`fixer`/`designer`), acceptance (`verifier`), log harvest
   (`scout`), running experiments (`operator`), or mechanical how-X-works
   (`explorer`).
-model: auto-smart[optimize_for=intelligence]
+model: claude-opus-5[effort=high,fast=false]
 readonly: true
 is_background: false
 ---

@@ -111,11 +111,13 @@ denials and malformed responses still block.
 | Agent | Model |
 |---|---|
 | `fixer`, `designer` | `grok-4.6[effort=high,fast=false]` |
-| `explorer` | `composer-2.5[fast=true]` |
 | `verifier` | `composer-2.5[fast=false]` |
-| `oracle` | `auto-smart[optimize_for=intelligence]` |
+| `oracle` | `claude-opus-5[effort=high,fast=false]` |
 | `oracle-sol` | `gpt-5.6-sol[effort=high,fast=false]` |
-| `librarian`, `operator`, `scout` | `auto-smart[optimize_for=cost]` |
+| `explorer`, `librarian`, `scout` | `auto-smart[optimize_for=cost]` |
+| `operator` | `auto-smart[optimize_for=balanced]` |
+
+The primary `oracle` pins Opus and `oracle-sol` pins Sol so Router cannot select Sol for both judgments. Cursor may still substitute models under account or team restrictions; configured model diversity is not proof of the models actually used.
 
 **`auto-smart`** requires **Teams or Enterprise** with Router enabled. Without Router, Cursor falls back to the workspace default model.
 
