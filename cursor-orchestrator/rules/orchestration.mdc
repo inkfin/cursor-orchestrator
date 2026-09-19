@@ -1,49 +1,61 @@
 ---
-description: Thin always-on gates for research, parallel acceptance, and artifact-first experiment operations. /orc opts into plan execution.
+description: Dispatch thresholds and safety gates. The parent completes bounded work; /orc scopes large multi-agent execution.
 alwaysApply: true
 ---
 
 # Agent orchestration
 
-The parent answers and implements by default. Multi-agent plan execution is opt-in: use `orc` only when the user invokes `/orc`, `orc`, 编排, or 主动安排任务, or explicitly asks specialists to execute a plan.
+The parent answers, investigates, implements, verifies, and runs bounded commands by default. Dispatch is an optimization, not a safety ritual. For automatic dispatch, keep work with the parent when a small, coherent set of tool calls can complete it.
 
-Always keep these safety rules when any lane is used: leaf agents never delegate; reproduce before a product fix; writer tasks use the four-field contract; one writer at a time unless isolated local worktrees are justified; cloud writers are forbidden.
+Multi-agent plan execution is opt-in. Use `orc` only when the user invokes `/orc`, `orc`, `orchestrate`, 编排, or 主动安排任务, or explicitly asks specialists to execute a large plan. `orc` applies to one declared goal and ends at its terminal condition, cancellation, or explicit replacement with another goal. Mentioning or reviewing the skill is not invocation. Status questions and in-scope corrections do not end the goal; follow the skill’s handoff steps when it ends.
+
+Apply decisions in order: honor explicit delegation requests within role and safety boundaries; satisfy risk-based verification; then evaluate automatic dispatch benefit and select a lane. Explicit delegation or independent review overrides the simple-work defaults below, but never grants extra mutation authority. If the requested lane is unavailable, report that limitation rather than presenting parent work as independent review.
+
+Automatically dispatch only when it materially improves at least one of: parallel latency, main-context size, independent judgment, or transaction isolation. The startup and handoff cost must be justified. Reproduce before a product fix, whether the parent or a writer implements it. When any lane is used, leaf agents never delegate; writer tasks use the four-field contract; one writer at a time unless isolated local worktrees are justified; cloud writers are forbidden.
 
 ## Research
 
 Do not guess paths, APIs, platform state, or external facts.
 
-- Known path or a bounded lookup: parent tools.
-- Broad or uncertain question with one search space: one `explorer` (local) or `librarian` (external).
-- Independent hypotheses or genuinely separate sources: 2–3 read-only lanes in one parallel wave. Give them non-overlapping questions, not file-cluster slices.
-- Do not launch a recon lane and parent Read/Grep the same scope in the same assistant turn. Once a lane owns a question, the parent must not repeat its searches while it runs. Reuse its report or resume that lane for a follow-up.
+- The parent owns initial discovery, ordinary repository search, known-path inspection, and bounded call-path tracing. An unknown symbol or path is not by itself a reason to dispatch.
+- Do not dispatch for a lookup likely answered by a few searches or reads, a question limited to a small set of files, or research already supported by the current session.
+- Use one `explorer` or `librarian` only when the search crosses several subsystems or sources, requires a long end-to-end trace, or would materially crowd the main context.
+- Use 2–3 read-only lanes only for genuinely independent hypotheses or separate sources that can run in parallel. Give them non-overlapping questions, not file-cluster slices.
+- Once a lane owns a question, do not duplicate that same search while it runs. The parent may continue adjacent work outside the delegated scope.
 - Each report is verdict-first and compact. Raw logs and large evidence stay in files; return paths plus the few facts needed to decide.
 
 ## Acceptance
 
-Explicit 验收 and completion of a non-trivial behavior change require one **parallel acceptance wave**:
+Verification strength follows risk across the entire goal: review the cumulative change from its start state, not only the latest repair. Consequential means a credible risk to security, data integrity, production availability, public compatibility, or multiple consumers. A one-line or localized change can be consequential. Apply the highest-risk condition first:
 
-1. Dispatch one `verifier` for requirements vs final diff vs executed evidence.
-2. In parallel, dispatch 1–3 focused read-only reviewers for orthogonal risks (for example ownership boundaries, compatibility, runtime behavior, security, or architecture). This count includes all reviewers after the verifier, for 2–4 reviewers total. Use `explorer` for traceable code facts and `oracle` only for judgment.
-3. Give every reviewer the same immutable diff/commit and evidence locations, but a distinct claim set. Do not send cloned prompts.
-4. The parent reconciles the compact reports once. A fail blocks acceptance; disagreement is stated, not averaged away. Repair gets at most one new acceptance wave.
+- Consequential changes require independent acceptance: one `verifier`, with focused reviewers only for distinct consequential claims. Large refactors and public-contract changes must be assessed for these risks regardless of diff size.
+- Explicit independent 验收 requires an independent reviewer even for a small change; parallel review is required only when requested or when distinct claims justify it.
+- Small or localized changes that are low-risk: the parent reviews the cumulative diff and runs focused checks. No subagent is required.
+- Medium changes without consequential risk: the parent verifies by default. Add one focused reviewer only for a concrete risk that direct inspection or tests do not cover.
+- A consequential `/orc` acceptance wave defaults to one `verifier` plus one orthogonal reviewer. Add reviewers only for distinct consequential claims, up to four total.
+- Give every reviewer the same immutable diff/commit and evidence locations, but a distinct claim set. Do not send cloned prompts.
+- The parent reconciles reports once. A fail blocks acceptance; disagreement is stated, not averaged away. Repair gets at most one new acceptance wave. If blocking findings remain after that budget, report incomplete or blocked; never waive them to declare success.
 
-Two reviewers are the default; four is the maximum. Comment-only, typo, and rename-with-no-behavior changes need only parent evidence unless the user explicitly asks for 验收. `oracle-sol` is not automatic; use it only when the user asks for a second verdict or two consequential judgments may conflict.
+Explicit "review this small diff" does not imply a multi-agent wave unless the user asks for independent or parallel review. `oracle-sol` is not automatic; use it only when the user asks for a second verdict or two consequential judgments may conflict.
 
 ## Experiments and runtime
 
-Keep platform payloads and logs out of the parent context:
+For every platform mutation, whether executed by parent or `operator`: act only on authorized resources within declared boundaries; inspect current state and existing receipts first; derive the idempotency key from operation + resource id + expected prior generation/attempt and reuse it for duplicate requests. Save command outcomes to a declared evidence path, verify the resulting state, and stop at the declared failure boundary. After a timeout or ambiguous outcome, reconcile actual state before retrying; never blindly repeat the mutation.
 
-- `operator` owns a named foreground control transaction: start/stop/retry, or preflight → dry-run → create → initial inspect. Its idempotency key is derived from operation + resource id + expected prior generation/attempt, not a fresh random id. Identical consecutive user requests reuse that key and existing receipts. Batch the transaction into one task instead of one task per CLI command. Point it to the repository's operation skill/run card rather than pasting known CLI help into the prompt. It writes raw command receipts only to declared evidence paths and returns status, IDs/URLs, artifact paths, and blockers.
-- `scout` owns one observation snapshot across all named related runs. It writes inspect output and logs under one declared log directory and returns criteria verdicts plus anomaly lines. While it runs, the parent does not issue overlapping platform inspect/log commands. If a selector or command makes the snapshot unverifiable, resume the same scout once with the corrected detail; do not open a new scout task.
-- When the user asks for the experiment conclusion, dispatch one read-only `oracle` with the hypothesis, gates, run ledger, and scout artifact paths. It reads artifacts directly and returns the decision; the parent does not paste raw logs into its prompt.
+The parent may run a single status/inspect/list command, a short dependent command sequence, or a bounded platform operation whose output is immediately needed in the current task. Keep related simple work together instead of paying a dispatch round trip.
+
+- Prefer `operator` when coordinating a named multi-step transaction materially benefits from isolated execution and handoff. Receipts or idempotency alone do not require delegation. The shared mutation safeguards above apply regardless of who executes it. Batch one complete transaction into one task instead of one task per CLI command. Point it to the repository's operation skill/run card rather than pasting known CLI help into the prompt.
+- Prefer `scout` when patrol spans multiple resources, log output is large, observation can run in the background, or artifacts must be harvested to disk. A simple progress check may stay with the parent. While a scout owns a snapshot, the parent does not issue overlapping platform inspect/log commands. If a selector or command makes the snapshot unverifiable, resume the same scout once with the corrected detail.
+- Use `oracle` for an experiment conclusion only when the judgment is consequential or the evidence is genuinely ambiguous. The parent may decide a straightforward conclusion directly from bounded evidence.
 - Long-running jobs use `goal-watch`: event/sparse wakeups only. A wake may create one snapshot, not a polling chain of subagents.
 
 The parent may update one canonical run record selected by the repository from compact receipts. Update derived indexes, handoffs, and summaries only at a terminal state or explicit handoff; do not fan every transient status into several ledgers or reread raw artifacts merely to restate a specialist result.
 
 ## If a writer is dispatched
 
-UI → `designer`; otherwise `fixer`. Writers run foreground. The parent does not edit active **Owned paths**.
+Outside an explicitly delegated package, ordinary small and medium changes remain parent-owned. Dispatch a writer only when the current scoped `/orc` goal assigns an implementation package, or the user explicitly asks to delegate implementation to a writer. A request such as "fix this" or "implement this" authorizes the parent to edit; it does not by itself request a subagent.
+
+When a writer is justified, UI → `designer`; otherwise `fixer`. Writers run foreground. The parent does not edit active **Owned paths**.
 
 Every writer task includes **Owned paths**, **Scope**, **Verification**, and **Execution mode** (`single` or `parallel/worktree`). Parallel writers need a real non-empty `git_branch` each, non-overlapping paths, and sequential integration. Cloud subagents are forbidden.
 

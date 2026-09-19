@@ -1,10 +1,14 @@
 ---
 name: librarian
 description: >-
+  Explicit requests for this role override the simple-work defaults below,
+  while role and mutation boundaries still apply.
   External docs, APIs, changelogs, and web facts with citations. Use when the
-  fact lives outside the product tree and the parent cannot answer from a
-  known URL or short lookup. Not for local product-tree recon (`explorer`),
-  CI/pod log harvest (`scout`), or architecture picks (`oracle`).
+  fact lives outside the product tree and research spans sources or would
+  materially crowd parent context. Not for a known URL, short official-doc
+  lookup, or bounded current-fact check the parent can complete directly. Not
+  for local product-tree recon (`explorer`), CI/pod log harvest (`scout`), or
+  architecture picks (`oracle`).
 model: auto-smart[optimize_for=cost]
 readonly: true
 is_background: false

@@ -7,9 +7,9 @@ It ships:
 - **9 custom subagents** under `agents/`
 - **9 workflow skills** under `skills/`
 - A writer **task-contract hook** under `hooks/`
-- One thin always-on rule under `rules/` (research, parallel 验收, and artifact-first experiments)
+- One thin always-on rule under `rules/` (dispatch thresholds and safety gates)
 
-The parent implements by default. The always-on rule does not dispatch writers to execute a plan; that protocol is the explicit `orc` skill (`/orc`). Research may fan out only across independent questions. Non-trivial acceptance uses one bounded parallel review wave. Experiment control/logs/conclusions flow through `operator` → evidence files, `scout` → log files, and `oracle` → compact decision. Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled.
+The parent handles bounded research, implementation, verification, and short platform commands by default. Automatic dispatch must materially improve parallel latency, context size, independent judgment, or transaction isolation. Large multi-agent execution is the explicit, goal-scoped `orc` skill (`/orc`). Broad research may fan out across independent questions; consequential changes require independent acceptance regardless of diff size; multi-step platform transactions and large log harvests may use `operator` and `scout`. Explicit role requests override simple-work defaults. Parent and operator share mutation safeguards. Goal cancellation or replacement requires handing off unfinished work and running jobs. Models live in each agent's `model:` frontmatter. Context7 and other MCP servers are not bundled.
 
 Herdr fleet management, peer mailbox files, and session hooks stay outside this plugin.
 
@@ -59,15 +59,15 @@ After IDE local or marketplace install, run **Developer: Reload Window** and con
 
 | Agent | Job |
 |---|---|
-| `explorer` | Local recon when landing is unknown (read-only, foreground) |
-| `librarian` | External docs, APIs, web facts (read-only, foreground) |
-| `operator` | One named CLI transaction; raw receipts to evidence files |
-| `scout` | One multi-resource patrol snapshot and log harvest |
-| `oracle` | Architecture / hard debug / experiment conclusion |
+| `explorer` | Broad cross-subsystem local recon (read-only, foreground) |
+| `librarian` | Multi-source external docs and web research (read-only, foreground) |
+| `operator` | Multi-step named CLI transaction with receipts |
+| `scout` | Multi-resource patrol snapshot and large-log harvest |
+| `oracle` | Consequential architecture / hard debug / experiment judgment |
 | `oracle-sol` | Second verdict when asked or conflict is likely |
 | `fixer` | Product-code writer (non-UI-primary) |
 | `designer` | UI / layout / a11y writer |
-| `verifier` | Independent 验收: requirements vs diff vs evidence |
+| `verifier` | Independent high-risk 验收: requirements vs diff vs evidence |
 
 Writers (`fixer`, `designer`) run foreground and need the four-field task contract. Parallel writers need a real `git_branch`. Cloud subagents are forbidden. See `rules/orchestration.mdc`.
 
@@ -75,11 +75,11 @@ Writers (`fixer`, `designer`) run foreground and need the four-field task contra
 
 | Skill | When |
 |---|---|
-| `verification-planning` | Evidence plan and bounded parallel 验收 |
+| `verification-planning` | Evidence plan for consequential independent 验收 |
 | `deepwork` | Large refactors under `/orc`; local worktree allocation |
 | `reflect` | Explicit only, process retrospective |
-| `orc` | Explicit only (`/orc`); parent plans, specialists execute |
-| `orc-patrol` | Explicit only, 巡查 |
+| `orc` | Explicit, goal-scoped (`/orc`); large plan execution to a terminal condition |
+| `orc-patrol` | Explicit delegated multi-resource patrol / log harvest |
 | `visual-analysis` | GUI canvas for standalone analytical reports (IDE only) |
 | `prototype-lite` | Throwaway local prototypes in declared scratch paths |
 | `collab-debug` | Evidence-driven cross-machine or cross-team diagnosis |

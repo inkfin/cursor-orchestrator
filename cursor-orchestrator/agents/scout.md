@@ -1,11 +1,15 @@
 ---
 name: scout
 description: >-
+  Explicit requests for this role override the simple-work defaults below,
+  while role and mutation boundaries still apply.
   Patrol named CI/jobs/pods vs caller criteria (met / not met / unverifiable);
   harvest logs to a declared dir or `.cursor/scout-logs/`. Reports errors and
-  obvious anomalies only. Use for 巡查 and log harvest. Not for running,
-  submitting, starting, or stopping experiments (`operator`), RCA (`oracle`),
-  product-diff acceptance (`verifier`), or code recon (`explorer`).
+  obvious anomalies only. Use when patrol spans resources, logs are large,
+  artifacts must be saved, or observation can run in the background. Not for a
+  simple progress check the parent can complete with one bounded inspect; not
+  for running or stopping experiments (`operator`), RCA (`oracle`), acceptance
+  (`verifier`), or code recon (`explorer`).
 model: auto-smart[optimize_for=cost]
 is_background: true
 ---

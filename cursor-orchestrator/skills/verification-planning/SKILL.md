@@ -1,17 +1,18 @@
 ---
 name: verification-planning
 description: >-
-  Plan evidence and a bounded parallel acceptance wave before a non-trivial
-  writer under /orc, or before 验收. Skip for parent-owned trivial work.
+  Plan evidence and a bounded acceptance wave before a consequential writer
+  package under /orc, or explicit independent 验收. Skip low-risk parent-owned
+  bounded work.
 ---
 
 # Verification planning
 
-Use this skill **before** a dispatched writer on a non-trivial change, and before an 验收 gate.
+Use this skill **before** a dispatched writer on a consequential change, and before an independent 验收 gate.
 
-The parent may skip this planning skill for Q&A, known-path edits, ≤3 files, and reproduced small fixes it implements itself (no `/orc`). This does not waive the always-on acceptance wave when the user asks for 验收 or a non-trivial behavior change is being declared done.
+Apply the always-on risk definitions to the cumulative change from the goal start state. Consequential risk or explicit independent acceptance takes priority over size and implementation owner. Skip this skill for Q&A, bounded research, and low-risk localized edits or reproduced fixes without an independent-review requirement. A behavior change alone does not require subagent acceptance.
 
-Trivial = single-file typo, comment-only edit, rename with no behavior change, or a reproduced small fix the parent is doing.
+Small file count or known paths do not establish low risk.
 
 ## Exemptions
 
@@ -40,11 +41,11 @@ Prefer automated evidence. If only manual proof is possible, name the steps.
 | Role | Owner |
 |---|---|
 | Implementation | parent, or `fixer` / `designer` when a writer is dispatched |
-| Requirements / diff / evidence | one `verifier` |
-| Focused risk review | 1–3 `explorer` / `oracle` reviewers with orthogonal claims |
+| Requirements / diff / evidence | parent, or one `verifier` for independent acceptance |
+| Focused risk review | 1–2 `explorer` / `oracle` reviewers with orthogonal claims when justified |
 | Reconciliation | parent, once all reports use the same immutable diff/commit |
 
-Two reviewers total is the default; four is the maximum. Do not clone prompts. Partition ownership, compatibility, runtime behavior, architecture, or security claims. The writer (or parent) runs **Verification** commands; reviewers inspect the resulting evidence independently.
+One verifier is sufficient for explicit independent acceptance with no separate risk claim. One verifier plus one focused reviewer is the default for a consequential `/orc` acceptance wave; four reviewers is the maximum when four distinct high-risk claims exist. Do not clone prompts. Partition ownership, compatibility, runtime behavior, architecture, or security claims. The writer or parent runs **Verification** commands; reviewers inspect the resulting evidence independently.
 
 ### 4. Acceptance strength
 
@@ -69,4 +70,4 @@ Set limits to prevent endless loops:
 
 ## Handoff
 
-Include the verification plan in the writer task under **Verification**. Before acceptance, freeze the diff/commit and evidence locations, then launch the reviewers in one parallel wave.
+Include the verification plan in the writer task under **Verification**. Before acceptance, freeze the diff/commit and evidence locations, then launch the reviewer, or one parallel wave when multiple distinct claims justify reviewers.

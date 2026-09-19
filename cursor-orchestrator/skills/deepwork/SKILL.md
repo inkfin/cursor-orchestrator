@@ -20,7 +20,7 @@ Do not use deepwork for small demos, throwaway research spikes, typo/comment edi
 
 Work proceeds in order; do not skip gates.
 
-1. **Recon** — parent maps touch points when they are known; dispatch **one** `explorer` if landing is unknown or many directories must be scanned.
+1. **Recon** — parent maps touch points when they are known; use bounded parent searches for unknown landing. Dispatch **one** `explorer` only when cross-subsystem research or a long trace justifies it under the always-on rule.
 2. **Plan** — parent defines packages, owned paths, integration order, verification per package.
 3. **Allocate** — decide single-writer vs local worktree parallel (see below).
 4. **Execute** — dispatch writer(s) with full task contracts (this skill is the cross-package / isolation case).

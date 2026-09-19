@@ -1,11 +1,15 @@
 ---
 name: explorer
 description: >-
-  Local codebase recon: call paths, how-X-works, file:line reports. Use when
-  landing is unknown, many directories must be scanned, or hypotheses can run
-  in parallel. Not for web/docs (`librarian`), CI/runtime 巡查 or log harvest
-  (`scout`), architecture verdicts (`oracle`), acceptance (`verifier`), product
-  edits (`fixer`/`designer`), or mutating named CLI (`operator`).
+  Explicit requests for this role override the simple-work defaults below,
+  while role and mutation boundaries still apply.
+  Broad local codebase recon: cross-subsystem call paths and file:line reports.
+  Use only when several directories must be scanned, a long trace would crowd
+  parent context, or independent hypotheses can run in parallel. Not for a
+  bounded lookup, an unknown symbol alone, or a small set of files; the parent
+  handles those. Not for web/docs (`librarian`), CI/runtime patrol (`scout`),
+  architecture verdicts (`oracle`), acceptance (`verifier`), product edits
+  (`fixer`/`designer`), or mutating named CLI (`operator`).
 model: composer-2.5[fast=true]
 readonly: true
 is_background: false
@@ -23,6 +27,9 @@ Leaf. Do not dispatch Task/subagents.
 
 ## Do not
 
+Simple-work exclusions below govern automatic routing; an explicit request for this role may override them.
+
+- Bounded search, known-path inspection, or a small-file trace → parent
 - Web/docs → `librarian`
 - CI/runtime 巡查 or log harvest → `scout`
 - Architecture verdict → `oracle`

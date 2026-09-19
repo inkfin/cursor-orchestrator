@@ -1,6 +1,6 @@
 {
   "name": "cursor-orchestrator",
-  "description": "Cursor-native policy pack: thin always-on research/acceptance gates, opt-in /orc plan execution, and writer task-contract hooks.",
+  "description": "Cursor-native policy pack: parent-owned bounded work, dispatch thresholds, goal-scoped opt-in /orc, and writer task-contract hooks.",
   "version": "0.4.0",
   "author": {
     "name": "finkzhang"

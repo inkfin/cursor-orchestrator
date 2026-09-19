@@ -1,15 +1,15 @@
 ---
 name: orc-patrol
 description: >-
-  One-shot runtime patrol. Invoke when the user asks for 巡查, orc-patrol, or
-  to check CI/jobs against acceptance criteria. Dispatch scout to harvest logs
-  locally and report errors or obvious execution anomalies only.
+  Explicit delegated runtime patrol. Invoke when the user names orc-patrol or
+  explicitly asks a scout to check multiple CI/jobs or harvest logs. Dispatch
+  scout to save artifacts and report errors or obvious anomalies only.
 disable-model-invocation: true
 ---
 
 # Orc-patrol
 
-**Explicit invocation only.** Apply this skill only when the user names `orc-patrol` or 巡查.
+**Explicit invocation only.** Apply this skill only when the user names `orc-patrol` or explicitly asks to delegate a multi-resource patrol or log harvest. A simple "巡查一下" or progress check may be completed directly by the parent.
 
 Future workflow commands may use the `orc-` prefix. This skill is just `orc-patrol`.
 
@@ -24,6 +24,6 @@ Pass through: acceptance criteria, named resources (run id, pod, URL), and log d
 
 If the user gave no criteria, default: job/pipeline succeeded; no errors; no obvious crash/OOM/timeout.
 
-Before dispatch, reuse an existing snapshot when resource state/version and criteria are unchanged. If a snapshot is unverifiable only because a selector or command was wrong, resume the same scout once with the correction; do not create another scout task. While scout runs, the parent does not issue overlapping inspect/log commands. After scout returns: show the compact verdict and log paths. Do not re-analyze or paste the logs. Escalate to `oracle` only if the user asks why or asks for an experiment conclusion.
+Before dispatch, reuse an existing snapshot when resource state/version and criteria are unchanged. If a snapshot is unverifiable only because a selector or command was wrong, resume the same scout once with the correction; do not create another scout task. While scout runs, the parent does not issue overlapping inspect/log commands. After scout returns: show the compact verdict and log paths. Do not re-analyze or paste the logs. If the user asks why or for an experiment conclusion, apply the always-on judgment threshold: the parent answers from bounded evidence; use `oracle` for consequential or ambiguous judgment.
 
-Scout is not a writer. It never starts, stops, retries, or creates experiments. Those are one complete named `operator` transaction.
+Scout is not a writer. It never starts, stops, retries, or creates experiments. Those follow the shared mutation safeguards and dispatch thresholds; when delegated, batch them into one complete named `operator` transaction.

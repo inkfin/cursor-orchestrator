@@ -4,13 +4,13 @@
     "name": "inkfin"
   },
   "metadata": {
-    "description": "Thin always-on research/验收 gates, opt-in /orc plan execution, writer task-contract hooks."
+    "description": "Parent-owned bounded work, dispatch thresholds, goal-scoped opt-in /orc, writer task-contract hooks."
   },
   "plugins": [
     {
       "name": "cursor-orchestrator",
       "source": "cursor-orchestrator",
-      "description": "Thin always-on research/验收 gates, opt-in /orc plan execution, writer task-contract hooks."
+      "description": "Parent-owned bounded work, dispatch thresholds, goal-scoped opt-in /orc, writer task-contract hooks."
     }
   ]
 }

@@ -1,10 +1,13 @@
 ---
 name: oracle
 description: >-
+  Explicit requests for this role override the simple-work defaults below,
+  while role and mutation boundaries still apply.
   Judgment: architecture, hard debug, experiment conclusions, consequential
-  review. Use when a cheap lane cannot decide; prefer artifact paths or an
-  explorer report. Not for
-  implementation (`fixer`/`designer`), acceptance (`verifier`), log harvest
+  review. Use only when bounded parent inspection cannot decide and the
+  judgment is consequential or genuinely ambiguous; prefer artifact paths or
+  an explorer report. Not for straightforward conclusions from bounded
+  evidence or ordinary implementation (`fixer`/`designer`), acceptance (`verifier`), log harvest
   (`scout`), running experiments (`operator`), or mechanical how-X-works
   (`explorer`).
 model: auto-smart[optimize_for=intelligence]
@@ -25,6 +28,9 @@ Leaf. Do not dispatch Task/subagents.
 
 ## Do not
 
+Simple-work exclusions below govern automatic routing; an explicit request for this role may override them.
+
+- Straightforward conclusion from bounded code, tests, or runtime evidence → parent
 - Implement → `fixer` / `designer`
 - Accept work → `verifier`
 - Harvest logs → `scout`

@@ -2,7 +2,9 @@
 name: fixer
 description: >-
   Product-code implementation (non-UI-primary) inside the four-field task
-  contract. Use when `orc` is active or the user asked for a writer.
+  contract. Use only for an implementation package in the current scoped
+  `/orc` goal, or when the user explicitly asks to delegate to a writer.
+  "Fix" or "implement" alone authorizes parent editing, not writer dispatch.
   Not for UI/layout/a11y as primary (`designer`), diagnosis or design
   (`oracle`/`explorer`), acceptance (`verifier`), or ops/patrol
   (`operator`/`scout`).

@@ -324,18 +324,43 @@ class PstackLiteSkillTests(unittest.TestCase):
 
     def test_parent_works_by_default(self) -> None:
         text = (PLUGIN_DIR / "rules" / "orchestration.mdc").read_text()
-        self.assertIn("The parent answers and implements by default", text)
+        self.assertIn(
+            "The parent answers, investigates, implements, verifies, and runs bounded commands by default",
+            text,
+        )
+        self.assertIn("Dispatch is an optimization, not a safety ritual", text)
         self.assertIn("Multi-agent plan execution is opt-in", text)
         self.assertIn("## Research", text)
+        self.assertIn("unknown symbol or path is not by itself a reason to dispatch", text)
         self.assertIn("## Acceptance", text)
-        self.assertIn("parallel acceptance wave", text)
-        self.assertIn("2–4 reviewers total", text)
+        self.assertIn("Small or localized changes", text)
+        self.assertIn("Medium changes", text)
+        self.assertIn("Large refactors", text)
         self.assertIn("## Experiments and runtime", text)
+        self.assertIn("single status/inspect/list command", text)
+        self.assertIn("A simple progress check may stay with the parent", text)
         self.assertIn("Raw logs and large evidence stay in files", text)
-        self.assertIn("Do not launch a recon lane and parent Read/Grep", text)
         self.assertIn("operation + resource id + expected prior generation/attempt", text)
+        self.assertIn('"fix this" or "implement this"', text)
         self.assertNotIn("Dispatch by default", text)
+        self.assertNotIn("completion of a non-trivial behavior change require", text)
         self.assertIn("Do not report lane counts", text)
+
+    def test_agent_descriptions_exclude_simple_parent_work(self) -> None:
+        expectations = {
+            "explorer": "bounded lookup",
+            "operator": "single status query",
+            "verifier": "small localized change",
+            "oracle": "straightforward conclusions",
+            "fixer": "authorizes parent editing",
+            "designer": "authorizes parent editing",
+            "scout": "simple progress check",
+            "librarian": "short official-doc",
+        }
+        for name, phrase in expectations.items():
+            with self.subTest(agent=name):
+                text = (PLUGIN_DIR / "agents" / f"{name}.md").read_text()
+                self.assertIn(phrase, text)
 
 
 class OrcSkillTests(unittest.TestCase):
@@ -356,10 +381,13 @@ class OrcSkillTests(unittest.TestCase):
     def test_opt_in_plan_execution(self) -> None:
         text = self.skill_text()
         self.assertIn("multi-agent plan execution", text)
-        self.assertIn("specialists execute the plan", text)
+        self.assertIn("Specialists execute the packages", text)
         self.assertIn("Dispatch to complete the plan", text)
-        self.assertIn("One acceptance wave", text)
+        self.assertIn("Terminal condition", text)
+        self.assertIn("small connective work", text)
+        self.assertIn("acceptance wave for consequential changes", text)
         self.assertIn("Artifact-first", text)
+        self.assertNotIn("for the rest of the session", text)
         self.assertNotIn("Dispatch by default", text)
 
     def test_mentions_scout_for_patrol(self) -> None:
