@@ -49,26 +49,20 @@ Then run **Developer: Reload Window**.
 
 ## Publishing an update
 
-Observed on `agent` CLI 2026.08.11-e8db854:
-
-- `agent plugin marketplace add` pins the marketplace to the **commit** that
-  was current when it ran, recorded as `gitRef`. Later pushes are not picked up.
-- `agent plugin marketplace update <name>` prints `✓ Updated ... 0 plugins
-  indexed` but does **not** re-index: `lastIndexedAt` stays unchanged. Do not
-  trust its output.
-- `agent plugin marketplace remove <url>` matches by URL and removes **every**
-  marketplace sharing that URL, not just the named one.
-
-So a push only reaches installs after re-adding:
+Observed on `agent` CLI 2026.10.01-e373342. After a push, refresh the existing marketplace:
 
 ```bash
-agent plugin marketplace remove <marketplace-name>
-agent plugin marketplace add https://github.com/inkfin/cursor-orchestrator
-agent plugin marketplace list --format json   # confirm gitRef and lastIndexedAt moved
+agent plugin marketplace update cursor-orchestrator
+agent plugin marketplace list --format json
 ```
 
-The marketplace name registered by `add` comes from `marketplace.json`'s `name`
-field, not from the repo or owner.
+`update` re-indexes through the server. A successful run reports the indexed plugin count, and `lastIndexedAt` moves. `gitRef` stays when the remote default branch has not moved; it advances when that branch has new commits. Do not `remove` and `add` just to pick up a push.
+
+`add` still records the commit that was current when it ran. Use it for a first install, not for a routine update. There is no `plugin install` subcommand; after adding a marketplace, enable the plugin from `/plugins` in interactive mode.
+
+`remove` deletes one user-scoped marketplace. If the name or URL matches more than one marketplace, the command stops instead of deleting every match.
+
+The marketplace name registered by `add` comes from `marketplace.json`'s `name` field, not from the repo or owner.
 
 ## Development
 
