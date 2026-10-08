@@ -10,7 +10,7 @@ description: >-
   evidence or ordinary implementation (`fixer`/`designer`), acceptance (`verifier`), log harvest
   (`scout`), running experiments (`operator`), or mechanical how-X-works
   (`explorer`).
-model: claude-opus-5[effort=high,fast=false]
+model: claude-opus-5-5-high
 readonly: true
 is_background: false
 ---

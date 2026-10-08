@@ -159,6 +159,11 @@ def main() -> int:
     if verifier_meta.get("is_background") != "false":
         errors.append("verifier: is_background must be false")
 
+    # oracle uses the flat Opus 5.5 High slug; bracket parameters are rejected
+    oracle_model = parse_frontmatter(AGENTS_DIR / "oracle.md").get("model", "")
+    if oracle_model != "claude-opus-5-5-high":
+        errors.append(f"oracle model must be claude-opus-5-5-high, got {oracle_model!r}")
+
     # oracle-sol model syntax
     sol_meta = parse_frontmatter(AGENTS_DIR / "oracle-sol.md")
     model = sol_meta.get("model", "")

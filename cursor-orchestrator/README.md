@@ -112,12 +112,12 @@ denials and malformed responses still block.
 |---|---|
 | `fixer`, `designer` | `grok-4.6[effort=high,fast=false]` |
 | `verifier` | `composer-2.5[fast=false]` |
-| `oracle` | `claude-opus-5[effort=high,fast=false]` |
+| `oracle` | `claude-opus-5-5-high` |
 | `oracle-sol` | `gpt-5.6-sol[effort=high,fast=false]` |
 | `explorer`, `librarian`, `scout` | `auto-smart[optimize_for=cost]` |
 | `operator` | `auto-smart[optimize_for=balanced]` |
 
-The primary `oracle` pins Opus and `oracle-sol` pins Sol so Router cannot select Sol for both judgments. Cursor may still substitute models under account or team restrictions; configured model diversity is not proof of the models actually used.
+The primary `oracle` pins Opus 5.5 High and `oracle-sol` pins Sol so Router cannot select Sol for both judgments. Opus 5.5 uses the flat slug because bracket parameters are rejected for that model. Cursor may still substitute models under account or team restrictions; configured model diversity is not proof of the models actually used.
 
 **`auto-smart`** requires **Teams or Enterprise** with Router enabled. Without Router, Cursor falls back to the workspace default model.
 
