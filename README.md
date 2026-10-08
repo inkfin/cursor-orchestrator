@@ -56,9 +56,9 @@ agent plugin marketplace update cursor-orchestrator
 agent plugin marketplace list --format json
 ```
 
-`update` re-indexes through the server. A successful run reports the indexed plugin count, and `lastIndexedAt` moves. `gitRef` stays when the remote default branch has not moved; it advances when that branch has new commits. Do not `remove` and `add` just to pick up a push.
+`update` re-indexes the commit already recorded in `gitRef`. A successful run reports the indexed plugin count, and `lastIndexedAt` moves. It does not fetch newer commits on the remote default branch. On 2026-10-08, updating while `origin/main` was `276ff0f` left `gitRef` at `daa0565`.
 
-`add` still records the commit that was current when it ran. Use it for a first install, not for a routine update. There is no `plugin install` subcommand; after adding a marketplace, enable the plugin from `/plugins` in interactive mode.
+To pin a newer commit, remove and add the marketplace again. `add` records the commit that was current when it ran. There is no `plugin install` subcommand; after adding a marketplace, enable the plugin from `/plugins` in interactive mode.
 
 `remove` deletes one user-scoped marketplace. If the name or URL matches more than one marketplace, the command stops instead of deleting every match.
 
